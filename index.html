@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar System Timeline Investigation</title>
+<style>
+:root{
+  --ink:#12203a; --muted:#47566e; --mist:#edf1f6; --surface:#ffffff; --line:#c9d3e0;
+  --indigo:#2b3a8f; --indigo-d:#1e2a6b; --gold:#e9b63c; --stab:#0e7c7b; --chg:#a3265f;
+  --good:#146c3a; --good-bg:#e5f4ea; --bad:#9b1c1c; --bad-bg:#fbeaea; --sky:#dfe8f5;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:90px}
+body{margin:0;background:var(--mist);color:var(--ink);font:18px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+h1,h2,h3{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;line-height:1.2;margin:0 0 .5em}
+h1{font-size:1.7rem} h2{font-size:1.5rem} h3{font-size:1.2rem;margin-top:1.4em}
+p{margin:.5em 0 .8em} ul,ol{margin:.4em 0 .9em;padding-left:1.3em} li{margin:.25em 0}
+a{color:var(--indigo)}
+header.top{background:var(--ink);color:#fff;padding:12px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:20;border-bottom:4px solid var(--gold)}
+header.top .brand{font:700 1.15rem "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;flex:1 1 auto}
+header.top .brand small{display:block;font:400 .78rem system-ui,sans-serif;opacity:.8}
+button{font:inherit;cursor:pointer}
+.hbtn{background:transparent;color:#fff;border:2px solid #8fa0c0;border-radius:8px;padding:6px 12px;min-height:40px}
+.hbtn:hover,.hbtn[aria-pressed=true]{background:#fff;color:var(--ink)}
+nav#steps{background:#fff;border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;padding:8px 12px;display:flex;gap:6px;position:sticky;top:68px;z-index:15}
+nav#steps button{flex:0 0 auto;border:2px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;min-height:42px;color:var(--ink)}
+nav#steps button[aria-current=step]{background:var(--indigo);border-color:var(--indigo);color:#fff;font-weight:700}
+nav#steps button.done:not([aria-current=step]){border-color:var(--good);background:var(--good-bg)}
+nav#steps .n{display:inline-block;min-width:1.4em;font-weight:700}
+main{max-width:920px;margin:0 auto;padding:22px 16px 80px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 18px}
+.lead{font-size:1.1rem;color:var(--muted)}
+.goal{border-left:6px solid var(--gold);background:#fff8e6;padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.btn{background:var(--indigo);color:#fff;border:0;border-radius:10px;padding:10px 18px;min-height:46px;font-weight:700}
+.btn:hover{background:var(--indigo-d)}
+.btn.alt{background:#fff;color:var(--indigo);border:2px solid var(--indigo)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.link{background:none;border:0;color:var(--indigo);text-decoration:underline;padding:6px 0;font-weight:600}
+:focus-visible{outline:3px solid #ff8a00;outline-offset:2px}
+.q{border-top:1px solid var(--line);padding:14px 0 6px;margin-top:6px}
+.q:first-of-type{border-top:0}
+.stem{font-weight:600;margin:.2em 0 .6em}
+.opts{display:grid;gap:8px}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:10px;padding:10px 14px;min-height:48px;color:var(--ink)}
+.opt:hover:not([disabled]){border-color:var(--indigo);background:#f3f5ff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg);text-decoration:line-through;text-decoration-color:#9b1c1c88}
+.opt.right{border-color:var(--good);background:var(--good-bg);font-weight:600}
+.opt[aria-pressed=true]{border-color:var(--indigo);background:#eef0ff}
+.opts.inline{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+body.tmode .opt.iskey{box-shadow:inset 6px 0 0 var(--gold)}
+body.tmode .opt.iskey::after{content:" (key)";font-size:.8em;color:var(--muted)}
+.fb{margin-top:8px;outline:none}
+.fb .good,.fb .bad{border-radius:8px;padding:8px 12px;margin:6px 0}
+.fb .good{background:var(--good-bg);color:#0d4a27}
+.fb .bad{background:var(--bad-bg);color:#6e1212}
+.why{background:var(--sky);border-radius:8px;padding:8px 14px;margin:6px 0}
+.why p,.why ul{margin:.3em 0}
+.src{font-size:.88rem;color:var(--muted)}
+input[type=text],input[type=number],select{font:inherit;padding:9px 12px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);min-height:46px;max-width:100%}
+.numrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.numrow input{width:11em}
+table.match{border-collapse:collapse;width:100%}
+table.match td{padding:6px 8px;vertical-align:middle;border-bottom:1px solid var(--line)}
+table.match select{width:100%}
+table.match tr.bad select{border-color:var(--bad);background:var(--bad-bg)}
+table.match tr.ok select{border-color:var(--good);background:var(--good-bg)}
+.badge{display:inline-grid;place-items:center;min-width:2.1em;height:2.1em;border-radius:50%;background:var(--ink);color:#fff;font-weight:700}
+ol.order{list-style:none;padding:0;margin:8px 0}
+ol.order li{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}
+ol.order .txt{flex:1 1 auto;font-size:.98rem;line-height:1.4}
+ol.order .txt b{display:block;font-size:1.05rem}
+ol.order .rank{color:var(--muted);font-weight:700;width:1.6em;text-align:right}
+.mv{display:flex;flex-direction:column;gap:4px}
+.mv button{border:2px solid var(--line);background:#fff;border-radius:8px;min-width:46px;min-height:36px;color:var(--ink)}
+.mv button:hover{border-color:var(--indigo);background:#f3f5ff}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
+.chip{width:48px;height:48px;border-radius:50%;border:2px solid var(--line);background:#fff;font-weight:700;color:var(--ink)}
+.chip.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.chip.ok:not(.on){background:var(--good-bg);border-color:var(--good)}
+details{margin:8px 0;background:#f7f9fc;border:1px solid var(--line);border-radius:8px;padding:6px 12px}
+summary{cursor:pointer;font-weight:600;padding:4px 0}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px}
+.scroll svg{display:block;min-width:720px;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.92rem;margin:8px 0}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{display:inline-block;width:26px;height:14px;border-radius:3px}
+.sw-chg{background:var(--chg)} .sw-stab{background:var(--stab)}
+.sw-both{background:repeating-linear-gradient(45deg,var(--stab) 0 5px,var(--chg) 5px 10px)}
+.sw-unk{background:#8a97ab}
+.sw-hyp{background:#fff;border:2px dashed var(--ink)}
+.slip{border:2px dashed var(--indigo);border-radius:10px;padding:10px 14px;background:#fbfcff;margin:10px 0}
+.slip p{margin:.25em 0}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.note{font-size:.9rem;color:var(--muted)}
+.tag{display:inline-block;background:var(--gold);color:var(--ink);border-radius:6px;padding:0 8px;font-size:.82rem;font-weight:700}
+dialog,#glossary{max-width:560px}
+#glossary{position:fixed;right:0;top:0;bottom:0;width:min(420px,100%);background:#fff;border-left:4px solid var(--gold);padding:18px;overflow:auto;z-index:50;box-shadow:-8px 0 24px #0003}
+#glossary dt{font-weight:700;margin-top:.7em} #glossary dd{margin:0}
+#printArea{display:none}
+table.rec{border-collapse:collapse;width:100%;font-size:.8rem;margin:6px 0 14px}
+table.rec th,table.rec td{border:1px solid #888;padding:3px 5px;vertical-align:top;text-align:left}
+textarea.out{width:100%;min-height:200px;font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;padding:10px;border:2px solid var(--line);border-radius:8px}
+@media (max-width:640px){body{font-size:17px} main{padding:14px 10px 70px} .panel{padding:14px 12px} header.top{position:static} nav#steps{top:0}}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;font-size:11pt;color:#000;background:#fff}
+  #printArea h1{font-size:16pt} #printArea h2{font-size:13pt;margin-top:12px}
+  #printArea svg{width:100%;height:auto;page-break-inside:avoid}
+  table.rec{page-break-inside:auto} tr{page-break-inside:avoid}
+}
+@media (prefers-reduced-motion:no-preference){.fb .good,.fb .bad{animation:pop .18s ease-out}@keyframes pop{from{transform:translateY(-3px)}to{transform:none}}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">Solar System Timeline Investigation<small>Solar system evolution &middot; student activity</small></div>
+  <button class="hbtn" id="gbtn" aria-expanded="false" aria-controls="glossary">Word bank</button>
+  <button class="hbtn" id="tbtn" aria-pressed="false" hidden>Show key on options</button>
+</header>
+<nav id="steps" aria-label="Activity steps"></nav>
+<main id="app" tabindex="-1"></main>
+<aside id="glossary" hidden aria-label="Word bank"></aside>
+<div id="printArea" aria-hidden="true"></div>
+
+<script>
+const TEACHER = false;
+(function(){
+'use strict';
+
+/* ================= DATA ================= */
+const SRC={
+1:["NASA Solar System Facts","https://science.nasa.gov/solar-system/solar-system-facts/"],
+2:["NASA Using Isotopes to Probe the Earliest History of the Solar Nebula","https://astrobiology.nasa.gov/news/using-isotopes-to-probe-the-earliest-history-of-the-solar-nebula/"],
+3:["NASA Planetary Systems","https://science.nasa.gov/universe/stars/planetary-system/"],
+4:["Nesvorny et al. The Role of Early Giant Planet Instability in Terrestrial Planet Formation","https://arxiv.org/abs/2012.02323"],
+5:["ESA Solar System Formation","https://lunarexploration.esa.int/explore/science/223?ia=278"],
+6:["Liu et al. Early Solar System instability triggered by dispersal of the gaseous disk","https://www.nature.com/articles/s41586-022-04535-1"],
+7:["NASA Helio Club Educator Background Information","https://assets.science.nasa.gov/content/dam/science/hpd/heat/nasa-helio-club/3.%20Educator%20Background%20Information_NASA%20Helio%20Club.pdf"],
+8:["NASA Moon Formation","https://science.nasa.gov/moon/formation/"],
+9:["NASA What was the Earth like right after it formed","https://science.nasa.gov/astrobiology/learning-resources/alp/earth-right-after-it-formed/"],
+10:["NASA Alternative Earths","https://astrobiology.nasa.gov/news/alternative-earths/"],
+11:["Ribeiro de Sousa et al. Dynamical evidence for an early giant planet instability","https://arxiv.org/abs/1912.10879"],
+12:["NASA What is the Late Heavy Bombardment","https://science.nasa.gov/moon/lunar-craters/what-is-the-late-heavy-bombardment/"],
+13:["NASA Asteroids, Comets and Meteors Facts","https://science.nasa.gov/asteroids-comets-meteors/facts/"]};
+
+const GLOSS=[
+["BYA / MYA","BYA means billion years ago. MYA means million years ago. A bigger BYA number is older."],
+["Nebula","A big cloud of gas and dust in space."],
+["Protostar","A baby star. It is not yet powered mainly by steady hydrogen fusion."],
+["Angular momentum","The amount of spin that a cloud keeps as it shrinks. Spin makes the cloud flatten into a disk."],
+["Accretion","Small pieces sticking together to make bigger pieces."],
+["Planetesimal","A small solid body, like a mini building block of a planet."],
+["Planetary embryo","A bigger building block. It is almost a small planet."],
+["Frost line","The distance from the Sun where it is cold enough for ice to form."],
+["Hydrogen fusion","Hydrogen atoms join to make helium. This gives off lots of energy."],
+["Main sequence","The long, steady part of a star's life. Core hydrogen fusion powers it."],
+["Outgassing","Gas that escapes from inside a hot planet."],
+["Resonance","A repeating tug between two orbits. It can push small bodies onto new paths."],
+["Hypothesis","An idea that scientists propose and still test. It is not settled."],
+["Orbital stability","Planets keep long-lived orbits. It does not mean nothing changes."],
+["Ejecta","Rock thrown out by a big impact."]
+];
+
+const CORE=["H","F","D","K","G","A","E","I","C"];
+
+const CARDS=[
+{id:"H",t:"Nebular collapse begins",short:"Cloud collapses",
+ simple:"Gravity pulls a cloud of gas and dust inward. The cloud gets denser and hotter.",
+ desc:"Gravity pulls part of a cloud of gas and dust inward. Matter becomes denser and heats as the solar system starts to form.",
+ rtp:"Find the approximate starting date. What evidence dates the oldest solar system solids? Does that date identify the exact instant collapse began?",
+ rab:"What changes a collapsing cloud into a central protostar and a flattened disk? Investigate gravity, heating, and conservation of angular momentum.",
+ date:{ok:"About 4.6 BYA",bad:["About 4.0 BYA","About 3.8 BYA","About 460 MYA"],hint:"Larger BYA means older. This is the very start of the story.",hint2:"The oldest meteorite solids are about 4.567 BYA. Pick the choice closest to that."},
+ type:"change",typeWhy:"Matter moves and heats up. Nothing is settled yet.",
+ ev:["Meteorite solids from about 4.567 BYA anchor the solar system clock. They do not mark the exact first moment of collapse.","Gravity squeezes and heats a cloud region. Modern star-forming clouds show how this works."],src:[1,2],
+ reason:"Everything else starts here. Gravity has to pull the cloud in first.",segs:[[4.6,4.567]]},
+{id:"F",t:"A protostar and rotating disk form",short:"Protostar + disk",
+ simple:"Matter gathers in the middle and makes a <b>protostar</b> (a baby star). The rest spins in a flat <b>disk</b>.",
+ desc:"Material gathers at the cloud's center into a protostar. Surrounding matter forms a rotating disk where planets can begin to grow.",
+ rtp:"When does this stage occur relative to collapse? Why does the disk flatten? Is a protostar already powered mainly by sustained hydrogen fusion?",
+ rab:"Research condensation as the disk cools. How do solid grains become available, and why do different materials condense in different places?",
+ date:{ok:"About 4.6 BYA. It overlaps the collapse.",bad:["About 4.1 BYA, after the Moon forms","About 3.8 BYA, with the bombardment","About 1.0 BYA"],hint:"The protostar and disk form while the cloud is still falling inward.",hint2:"Is a protostar already a full star? No. So this comes very early."},
+ type:"change",typeWhy:"Spinning matter reshapes into a star and a disk. That is a big change.",
+ ev:["Near the beginning, about 4.6 BYA. It overlaps the collapse and the start of solid growth.","Spin and collisions in the falling material make a disk. We can see young stars with disks. The Sun is not yet a main-sequence star."],src:[1,3],
+ reason:"It needs the collapse first. The disk comes before planet building.",segs:[[4.6,4.55]]},
+{id:"D",t:"Planet accretion begins",short:"Planet accretion",
+ simple:"Tiny solid bits stick together and grow. They become <b>planetesimals</b> and <b>planetary embryos</b>. These are the building blocks of planets.",
+ desc:"Small solid particles collect into larger bodies. Planetesimals and planetary embryos become building blocks for planets.",
+ rtp:"When did solid growth begin? Research how collisions, sticking, and gravity contribute, and what meteorites reveal about the timing.",
+ rab:"What lets some growing bodies capture gas while others become rocky worlds? Investigate temperature, location, mass, and available material.",
+ date:{ok:"Starts in the first few million years. Rocky planets keep growing for 100+ million years.",bad:["Starts about 4.0 BYA and ends in one year","Starts about 4.4 BYA, after the Moon forms","Starts about 3.8 BYA, with the bombardment"],hint:"Meteorites hold solids that are almost as old as the solar system.",hint2:"Growth starts early and lasts a long time: tens of millions of years or more."},
+ type:"both",typeWhy:"Bodies build up (change). They also become solid planet seeds (a step toward settling down).",
+ ev:["Within the first few million years. It lasts tens to over 100 million years for rocky planets.","Solids collect into planetesimals and embryos. Meteorite ages show early growth. Collision models show later assembly."],src:[2,3,4],
+ reason:"It needs a disk of solids. It starts within a few million years.",segs:[[4.567,4.45]]},
+{id:"J",t:"Giant planets grow in the outer disk",short:"Giant planets grow",
+ simple:"Far from the Sun it is cold, so ice and rock pile up. Jupiter and Saturn grab huge amounts of hydrogen and helium gas.",
+ desc:"Growing bodies beyond the hot inner disk gain ice and rock. Jupiter and Saturn acquire especially large hydrogen-helium envelopes.",
+ rtp:"How quickly must gas giants form? Research the frost line and gas capture. Must all giant planets finish growing at exactly the same time?",
+ rab:"How do massive planets affect the paths of gas, planetesimals, and other planets? Research gravitational scattering and orbital resonances.",
+ date:{ok:"First few million years, before the gas disk is gone",bad:["About 4.0 BYA, long after the gas is gone","About 3.8 BYA, with the bombardment","About 1.0 BYA"],hint:"Gas giants need gas. When is gas easy to find?",hint2:"Jupiter and Saturn must finish gas capture before most gas disappears (see card B)."},
+ type:"change",typeWhy:"Huge planets form and grab gas. That is a big change.",
+ ev:["Mostly the first few million years for Jupiter and Saturn, before the gas disk is gone.","Ice and rock build cores outside the frost line. A big enough core can capture gas. All four giants do not have to finish together."],src:[5],
+ reason:"Giants build in the outer disk while gas is still there (before B).",segs:[[4.567,4.56]],full:true},
+{id:"B",t:"The planet-forming gas disk disperses",short:"Gas disk disperses",
+ simple:"The gas around the young Sun gets used up or blown away. Planets that still need lots of gas now have a small supply.",
+ desc:"Gas around the young Sun is removed or used up. Planets that still need large amounts of nebular gas now have a limited supply.",
+ rtp:"How long do gas-rich disks usually last? Why must Jupiter and Saturn acquire their large gas envelopes before most of this gas disappears?",
+ rab:"How can rocky planets keep growing after gas dispersal? Investigate collisions and the gravity of surviving solid bodies.",
+ date:{ok:"A few to about 10 million years after formation",bad:["About 500 million years after formation","About 3.8 BYA","Never. Gas disks last for billions of years"],hint:"Look at young stars with disks. Most lose their gas fast.",hint2:"Think millions of years, not billions."},
+ type:"both",typeWhy:"The gas leaves (change). With less gas, planets get pushed around less (more stable).",
+ ev:["A few to roughly 10 million years after formation. Usually before card K.","Gas falls onto the star, goes into planets, and is blown away by radiation. Disk observations show how long disks last. Solid growth keeps going."],src:[5,6],
+ reason:"It comes after the giants grab gas. It is usually before the Sun reaches steady fusion (K).",segs:[[4.565,4.555]],full:true},
+{id:"K",t:"The Sun reaches sustained hydrogen fusion",short:"Sun starts fusion",
+ simple:"The young Sun gets hot and dense inside. It starts steady <b>hydrogen fusion</b>. Now it is a <b>main-sequence</b> star.",
+ desc:"The contracting young Sun becomes hot and dense enough for sustained core hydrogen fusion to supply most of its energy. It enters the main sequence.",
+ rtp:"About how long does a Sun-like star take to reach this stage? Distinguish protostar formation from the start of main-sequence life.",
+ rab:"How do radiation and stellar activity affect nearby material? Investigate disk gas loss, and check whether most disk dispersal happened before this milestone.",
+ date:{ok:"About 50 million years after the collapse (near 4.55 BYA)",bad:["The same moment the protostar forms (4.6 BYA)","About 1 million years after the collapse","About 3.8 BYA"],hint:"A protostar is not yet powered by steady fusion. It needs more time.",hint2:"Use your math from Step 2: 4.6 BYA minus 50 million years."},
+ type:"stability",typeWhy:"A steady energy source is a big step toward stability.",
+ ev:["Roughly 50 million years after collapse. On this scale that is about 4.6–4.5 BYA.","Core hydrogen fusion becomes the main, steady energy supply. This is later than the first protostar."],src:[7],
+ reason:"It is about 50 million years after collapse. It is later than the protostar.",segs:[[4.555,4.545]]},
+{id:"G",t:"Rocky planets assemble and the Moon forms",short:"Rocky planets + Moon",
+ simple:"Baby planets crash together and build rocky worlds. Our Moon likely formed from debris of a giant crash into early Earth.",
+ desc:"Planetary embryos collide to build larger rocky worlds. A leading explanation for our Moon involves debris from a giant impact on early Earth.",
+ rtp:"How long did rocky planet assembly last? Find an approximate Moon-formation age and evidence for the giant-impact explanation.",
+ rab:"How did collision heating, melting, separation into layers, and later cooling change Earth? Which processes overlap atmosphere formation?",
+ date:{ok:"Rocky planets: tens to 100+ million years. Moon: about 4.5 BYA.",bad:["Moon: about 3.8 BYA","All rocky planets finished in one million years","Moon: about 2.0 BYA"],hint:"Use your math from Step 2. The Moon formed about 100 million years after the collapse.",hint2:"4.6 BYA minus 0.1 billion years = ?"},
+ type:"change",typeWhy:"Crashes build worlds and make lots of heat. That is a big change.",
+ ev:["Rocky assembly lasts tens to over 100 million years. Moon formation is about 4.5 BYA.","Giant impacts build worlds and make heat. Moon samples and Earth–Moon chemical similarities help test the giant-impact idea."],src:[4,8],
+ reason:"It needs collected solids (D). The Moon forms about 4.5 BYA.",segs:[[4.55,4.45]]},
+{id:"L",t:"Giant planets migrate and rearrange orbits",short:"Giants rearrange",
+ simple:"Giant planets can move. Some models say their orbits went through a time of shaking and scattering.",
+ desc:"Interactions with a disk and other bodies can shift giant planets' orbits. Some models include a period of orbital instability and scattering.",
+ rtp:"Compare an early instability model with a delayed one. What timing does each propose? What evidence from small-body orbits can test them?",
+ rab:"How could moving planets redirect debris? Test whether your source requires a late impact spike or allows impacts to decline gradually.",
+ date:{ok:"It depends on the model: early (first 100 million years) or later (hundreds of millions of years after)",bad:["Only after 1 BYA","All scientists agree: exactly 4.0 BYA","Planets cannot move in any model"],hint:"The card says “some models.” So models can disagree.",hint2:"There are two kinds of model: one early and one delayed."},
+ type:"change",typeWhy:"Planet orbits move and scatter debris. That is change.",
+ ev:["Model-dependent. Many models put an instability in the first 100 million years. Delayed models put it hundreds of millions of years later.","Orbits of small bodies help test the computer models. Use a cited source if you place it late."],src:[6,11],
+ reason:"It needs giant planets (J). Your chosen model decides early or late.",segs:null,full:true},
+{id:"A",t:"Earth develops an early atmosphere",short:"Atmosphere forms",
+ simple:"Gases from inside Earth and from impacts make an early atmosphere. It is very different from the air we breathe now.",
+ desc:"Gases released from Earth's interior and materials brought by impacts contribute to an early atmosphere. It differs greatly from the air we breathe today.",
+ rtp:"When did this process begin? Distinguish an early hydrogen-helium envelope from a later atmosphere supplied by outgassing and impacts.",
+ rab:"How did cooling, water condensation, and later biological activity change this atmosphere? Which changes happened before or after your next card?",
+ date:{ok:"Starts about 4.5–4.4 BYA. It has no single finish date.",bad:["Starts after 3.8 BYA, when bombardment ends","Finishes at exactly 4.0 BYA","Starts about 600 MYA"],hint:"The atmosphere starts as Earth grows. It does not wait for the late bombardment.",hint2:"It overlaps with the Moon forming (card G)."},
+ type:"change",typeWhy:"Gases are lost, added, and cooled. The air changes a lot.",
+ ev:["Begins during early Earth growth, about 4.5–4.4 BYA. There is no single finish date.","Early light gas is lost. Outgassing and impacts add new gases. Cooling lets water condense. Oxygen from life is a separate, later change."],src:[9,10],
+ reason:"It starts as Earth grows and heats, about 4.5–4.4 BYA. It overlaps G.",segs:[[4.5,4.4]],open:true},
+{id:"E",t:"Late Heavy Bombardment hypothesis",short:"Late bombardment?",
+ simple:"Some scientists think there was a late burst of huge impacts. This is a <b>hypothesis</b>. Scientists still debate it.",
+ desc:"Scientists proposed a later surge of large impacts to explain some lunar impact ages. Whether there was a distinct spike remains debated.",
+ rtp:"What date range is traditionally proposed? Compare a sudden spike with a gradual decline. What sample or dating issues complicate the evidence?",
+ rab:"What removes or redirects potential impactors over time? Explain how bombardment can decrease while occasional large impacts still happen.",
+ date:{ok:"Proposed: about 4.1–3.8 BYA, peak near 3.9 BYA (a hypothesis)",bad:["About 4.6–4.5 BYA (proven fact)","About 1.0–0.5 BYA","About 4.1–3.8 MYA"],hint:"Check the units! BYA is billions. MYA is millions.",hint2:"It is traditionally placed after the Moon forms and before the bombardment fades (about 3.8 BYA)."},
+ type:"change",typeWhy:"A burst of impacts would be a big change, if it happened.",
+ ev:["Traditional interval: about 4.1–3.8 BYA, often summarized as a peak near 3.9 BYA. Label it a hypothesis.","Apollo impact ages led to the late-spike idea. Mixed samples, Imbrium ejecta, and dating limits make that hard to be sure about. A gradual decline is another idea."],src:[12],
+ reason:"It is based on Moon-rock ages, so it comes after the Moon (G). It is a hypothesis.",segs:[[4.1,3.8]],hyp:true},
+{id:"I",t:"Intense early bombardment wanes",short:"Bombardment wanes",
+ simple:"Big crashes happen less often. The leftover debris gets used up or moved. Impacts never fall to zero.",
+ desc:"Large collisions become less frequent as the supply and orbits of leftover debris change. The impact rate does not fall to zero.",
+ rtp:"When does the traditional timeline mark the end of the most intense bombardment? Is there one agreed date? What do crater records actually show?",
+ rab:"How do accretion, ejection, and orbital rearrangement reduce encounters? Explain why fewer impacts help surfaces persist without proving that all orbits are stable.",
+ date:{ok:"Classroom milestone: about 3.8 BYA (a broad change, not one hard date)",bad:["About 4.5 BYA","About 380 MYA","About 1.0 BYA"],hint:"It comes after the proposed late spike.",hint2:"The traditional classroom milestone is about 3.8 BYA."},
+ type:"both",typeWhy:"The change is a drop in impacts. Fewer impacts let surfaces last longer (more stability).",
+ ev:["Traditional classroom milestone: about 3.8 BYA. It is a broad change, not a hard stop.","The debris that planets can reach is used up or moved. Crater counts on dated surfaces show changing rates. Big impacts still happen. A drop in impacts does not date when orbits became stable."],src:[12,13],
+ reason:"It comes after the proposed spike. Debris is used up or moved.",segs:[[3.85,3.75]]},
+{id:"C",t:"Current relative stability",short:"Stable today",
+ simple:"The big planets keep long-lived orbits. Small bodies, impacts, and surface changes still happen.",
+ desc:"The major planets follow long-lived orbits. Small bodies, impacts, and changes on planetary surfaces still occur.",
+ rtp:"What does orbital stability mean? Use observations or a scientific model to distinguish it from an unchanging solar system.",
+ rab:"Looking beyond this card, research one internal and one external cause of future change. Give a mechanism and a likely timescale for each.",
+ date:{ok:"Present day. No single date starts all stability.",bad:["Exactly 3.8 BYA, when all change stopped","Exactly 4.5 BYA, when the Moon formed","In the far future"],hint:"The card says “current.”",hint2:"Orbits became steady over a long time. There is no single instant."},
+ type:"stability",typeWhy:"Orbits stay steady. Small things still change, so stability does not mean no change.",
+ ev:["Present day. It follows billions of years of mostly steady planet paths.","Most major orbits stay long-lived. Surfaces, air, and small-body paths still change. No single date starts every kind of stability."],src:[1,11],
+ reason:"It is the present day. It follows billions of years of steady orbits.",segs:[[3.8,0]],fade:true}
+];
+const BYID={};CARDS.forEach(c=>BYID[c.id]=c);
+
+const CONS=[
+["H","F","A cloud must start to fall inward before a protostar forms."],
+["F","D","The disk has to exist before solids can collect in it."],
+["F","J","Giant planets grow inside the disk."],
+["J","B","Jupiter and Saturn need disk gas, so they grow before it is gone."],
+["B","K","Most disk gas is gone before steady fusion starts."],
+["F","K","A protostar comes before a main-sequence star."],
+["D","G","Rocky planets and the Moon come from collected solids."],
+["G","E","The late-spike idea is based on Moon rocks, so the Moon comes first."],
+["F","A","An atmosphere needs a planet, and planets need a disk first."],
+["A","E","The early atmosphere does not wait for the proposed late bombardment."],
+["K","E","The Sun is steady long before the proposed late bombardment."],
+["E","I","The spike comes before the decline."],
+["I","C","Present day comes last."],
+["J","L","Giant planets must exist before they can move."]
+];
+const TOL={H:.035,F:.035,D:.05,J:.02,B:.02,K:.02,G:.05,A:.06,E:.15,I:.1,C:.4};
+const ORDER_KEY_FULL=["H","F","D","J","B","K","G","L","A","E","I","C"];
+
+const WINDOWS=[
+{t:"4.6 to 4.55 BYA (50 million years)",hi:4.6,lo:4.55},
+{t:"4.6 to 4.4 BYA (200 million years)",hi:4.6,lo:4.4},
+{t:"4.6 to 3.0 BYA (1.6 billion years)",hi:4.6,lo:3.0},
+{t:"4.6 BYA to today (no inset)",hi:4.6,lo:0}];
+
+/* Bridges */
+const OVERLAP="Overlap (they run at the same time)",SEQ="Sequence (one ends, then the next starts)",HYP="Hypothesis (a proposed idea that models still test)";
+const BR=[
+{id:"b1",title:"Collapse, then a disk, then solids",chain:"H → F → D",rabFrom:["H","F"],kind:OVERLAP,
+ kindHint:"Do these steps wait for each other to finish?",
+ cause:{stem:"How does a falling cloud turn into a star with a flat disk around it?",ok:"Gravity pulls matter in. Spin (<b>angular momentum</b>) and collisions flatten the rest into a disk.",bad:["Sunlight pushes all the gas into a flat sheet.","A giant planet drags the cloud flat.","The cloud cools and stops moving, so it falls flat."],hint:"Think of spinning pizza dough. What makes it flat?",hint2:"The cloud keeps its spin as it shrinks. Falling matter also bumps into other matter."},
+ time:{stem:"Cooling lets solid grains form in the disk. How do these steps line up in time?",ok:"They overlap. All happen in the first few million years after 4.6 BYA.",bad:["Each ends before the next begins, with a billion years between.","They happen in reverse order.","Each takes exactly one year."],hint:"The cards say these steps overlap. Do they wait a billion years?",hint2:"Everything here happens in the first few million years."},
+ evid:{stem:"What evidence supports this bridge?",ok:"We can see young stars with disks. Meteorites hold dated bits of early solids.",bad:["Written records from long ago.","Crater counts on Earth today.","Photos of the Sun's core."],hint:"Think about what we can observe in space now and what we can hold in our hands.",hint2:"One clue is in the sky. One clue fell to Earth."},
+ src:[1,2,3,4]},
+{id:"b2",title:"Giants grow, then the gas disperses",chain:"D → J → B",rabFrom:["D","B"],kind:OVERLAP,full:true,
+ kindHint:"Rocky bodies keep growing while the giants take gas.",
+ cause:{stem:"Why must Jupiter and Saturn grow before the gas disk is gone?",ok:"They make their big hydrogen-helium envelopes from disk gas. So they must grow while the gas lasts.",bad:["They collect gas from asteroids long after the disk is gone.","The Sun gives them gas after it starts fusion.","They do not need gas at all."],hint:"What do gas giants need to become gas giants?",hint2:"Card B says that after the gas is gone, planets that need gas have a limited supply."},
+ time:{stem:"About how long is the window for gas capture?",ok:"A few million years, up to about 10 million.",bad:["About 1 billion years.","About 4.6 billion years.","One day."],hint:"Gas disks around young stars do not last long.",hint2:"Millions of years, not billions."},
+ evid:{stem:"What evidence supports this bridge?",ok:"Young disks are seen losing gas within a few million years. Planet-formation models need quick growth.",bad:["Earth rocks show that gas giants formed late.","Moon craters show that gas giants formed late.","Gas giants are too far away, so nothing is known."],hint:"Which evidence is about disks and how long they last?",hint2:"Observed disks plus computer models."},
+ src:[3,5,6]},
+{id:"b3",title:"A hot early Earth gets its air",chain:"G and A together",rabFrom:["G","A"],kind:OVERLAP,
+ kindHint:"Do the Moon-forming crash and the air have to take turns?",
+ cause:{stem:"What lets gases come out of early Earth?",ok:"Impacts and radioactive decay heat early Earth. Rock melts, heavy material sinks, and gases escape (<b>outgassing</b>).",bad:["Only sunlight heats Earth, so nothing melts.","Living things make all of the air first.","The air must wait until the bombardment ends."],hint:"Where could gases come from if Earth is hot inside?",hint2:"Heat melts rock. Gases leak out. Impacts add more."},
+ time:{stem:"How does the start of the atmosphere line up with the Moon forming?",ok:"They overlap, about 4.5–4.4 BYA.",bad:["The air starts at 3.8 BYA, after the bombardment.","The air starts about 1 BYA.","The air ends the moment the Moon forms."],hint:"Do not make the air wait for the late bombardment.",hint2:"Both start around 4.5 BYA."},
+ evid:{stem:"What evidence supports this bridge?",ok:"Moon samples and Earth–Moon chemistry support the giant impact. Models of outgassing and impacts explain the gases.",bad:["Fossils from 4.4 BYA show the air.","Photos of the Sun.","Nothing. It is only a guess."],hint:"What do we have from the Moon?",hint2:"Moon rocks plus computer models."},
+ src:[8,9,10]},
+{id:"b4",title:"Moving giants and impacts (a model test)",chain:"L → E or I",rabFrom:["L","E"],kind:HYP,full:true,
+ kindHint:"Scientists disagree here, and models test the ideas.",
+ cause:{stem:"How could moving giant planets cause impacts?",ok:"Moving giants shift <b>resonances</b> and kick debris onto new paths.",bad:["Giant planets crash into every comet.","Moving planets stop all impacts at once.","Planets switch off the Sun's gravity."],hint:"A big planet's gravity can push small bodies. What happens when it moves?",hint2:"A resonance is a repeating tug. Changing it can send debris somewhere new."},
+ time:{stem:"How does timing change each model's prediction?",ok:"Delayed model: a late impact surge. Early model: debris moves early, so impacts can fade gradually.",bad:["Both models predict the same late spike.","Early model: a late spike. Delayed model: an early fade.","Neither model says anything about impacts."],hint:"Match “delayed” with “late.”",hint2:"Early shaking moves debris early."},
+ evid:{stem:"What evidence can test these models?",ok:"The orbits of small bodies, like asteroids, help test the computer models.",bad:["The color of the planets.","The number of rings on Saturn.","Nothing can test these models."],hint:"Which choice is about the paths of small things?",hint2:"Small bodies keep clues in their orbits."},
+ src:[6,11,12]},
+{id:"b5",title:"Fewer impacts, then steady planet paths",chain:"E → I → C",rabFrom:["E","I"],kind:SEQ,
+ kindHint:"Impacts fade first. Then steady orbits continue for a long time.",
+ cause:{stem:"What makes big impacts less common over time?",ok:"Debris gets used up, hits planets, or is thrown out of the system.",bad:["Debris cools and disappears.","Planets grow bigger and make more debris.","The Moon blocks all impacts."],hint:"What can happen to a rock that keeps orbiting?",hint2:"It can hit something, or it can leave."},
+ time:{stem:"From the classroom milestone (3.8 BYA) to today, about how much time has passed?",ok:"About 3.8 billion years.",bad:["About 38 million years.","About 380 thousand years.","About 3.8 thousand years."],hint:"3.8 BYA means 3.8 billion years ago.",hint2:"Pick the one with “billion.”"},
+ evid:{stem:"What evidence supports this bridge?",ok:"Crater counts on dated surfaces show impact rates. Orbit models show planet paths. They answer different questions.",bad:["Crater counts alone prove all orbits are stable.","Orbit models alone count craters.","Only the Moon's craters matter."],hint:"Craters tell about impacts. What tells about orbits?",hint2:"Two kinds of evidence. Two different questions."},
+ src:[11,12,13]}
+];
+
+/* ================= STATE ================= */
+const KEY="solar-timeline-v1"+(TEACHER?"-t":"");
+function fresh(){return{seed:Math.floor(Math.random()*1e9),name:"",mode:"full",step:0,started:false,cur:"H",a:{},order:null,orderChecks:0,orderDone:false,orderMsg:[],orderShown:false,lm:null,chart:"both",gw:{},tl:{},sel5:null,bview:"full"}}
+function load(){try{const j=localStorage.getItem(KEY);if(j)return Object.assign(fresh(),JSON.parse(j))}catch(e){}return fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let S=load();
+
+/* ================= HELPERS ================= */
+const $=(s,r)=>(r||document).querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const strip=h=>String(h).replace(/<[^>]+>/g,"");
+function hash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuf(arr,key){const r=rng(hash(key+S.seed)),a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const full=()=>S.mode==="full";
+const cardsInMode=()=>CARDS.filter(c=>full()||CORE.includes(c.id));
+const typeLabel={change:"Change",stability:"Increasing stability",both:"Both"};
+function srcLinks(nums){return nums.map(n=>`<a href="${SRC[n][1]}" target="_blank" rel="noopener">[${n}] ${esc(SRC[n][0])}</a>`).join("; ")}
+function srcNums(nums){return "["+nums.join(", ")+"]"}
+
+/* ================= QUESTIONS ================= */
+const Q={};
+function addQ(id,sec,def){Q[id]=Object.assign({id,sec},def)}
+const TYPE_OPTS=["Change","Increasing stability","Both"];
+
+// Step 2: math
+addQ("m0","math",{type:"mc",stem:"Which is <b>older</b>: 4.5 BYA or 3.8 BYA?",opts:["4.5 BYA","3.8 BYA"],keep:true,inline:true,ok:"4.5 BYA",hint:"BYA means billion years ago. A bigger number means farther back in time.",hint2:"Count back: 3.8 billion years ago, then 4.5 billion years ago. Which is farther?",why:"<div class='why'>Bigger BYA values are older. 4.5 BYA is older than 3.8 BYA.</div>"});
+addQ("m1","math",{type:"num",stem:"Change units. <b>4.6 BYA = how many MYA?</b> (1 billion = 1,000 million)",ok:4600,tol:0.5,unit:"MYA",hint:"Multiply by 1,000 to change billions into millions.",hint2:"4.6 × 1,000 = ?",why:"<div class='why'>4.6 BYA = 4,600 MYA. Card H is the teacher demo: add 4.6 BYA together.</div>"});
+addQ("m2","math",{type:"num",stem:"The Sun reaches steady fusion about <b>50 million years</b> after the collapse begins (4.6 BYA). About how many BYA is that? Give the answer in BYA.",ok:4.55,tol:0.004,unit:"BYA",hint:"First change 50 million into billions: 50 ÷ 1,000 = 0.05 billion.",hint2:"Later in time means a smaller BYA number. So subtract: 4.6 − 0.05 = ?",why:"<div class='why'>50 million years = 0.05 billion years. 4.6 − 0.05 = <b>4.55 BYA</b>.</div>"});
+addQ("m3","math",{type:"num",stem:"The Moon formed about <b>4.5 BYA</b>. How many <b>million years after</b> the collapse (4.6 BYA) is that?",ok:100,tol:0.5,unit:"million years",hint:"Subtract: 4.6 − 4.5 = ? billion years.",hint2:"4.6 − 4.5 = 0.1 billion. Now × 1,000 to get millions.",why:"<div class='why'>4.6 − 4.5 = 0.1 billion years = <b>100 million years</b>.</div>"});
+addQ("m4","math",{type:"num",stem:"The Late Heavy Bombardment is proposed to peak near <b>3.9 BYA</b>. How many <b>million years after the Moon formed</b> (4.5 BYA) is that?",ok:600,tol:0.5,unit:"million years",hint:"Subtract: 4.5 − 3.9 = ? billion years.",hint2:"4.5 − 3.9 = 0.6 billion. Now × 1,000.",why:"<div class='why'>4.5 − 3.9 = 0.6 billion years = <b>600 million years</b>.</div>"});
+addQ("m5","math",{type:"num",stem:"The first 100 million years is what <b>percent</b> of the whole 4,600 million years? Round to a whole number.",ok:2,tol:0.5,unit:"%",hint:"Divide 100 by 4,600. Then multiply by 100.",hint2:"100 ÷ 4,600 = 0.0217… × 100 = ?",why:"<div class='why'>100 ÷ 4,600 × 100 ≈ <b>2%</b>. A lot happens in a tiny slice of the timeline.</div>"});
+addQ("m6","math",{type:"mc",stem:"Many events happen in that first 2%. On a straight line for all 4.6 billion years, what happens to those early cards?",opts:["They are squeezed into a tiny space. I need an inset or scale break.","They spread out evenly.","They are too far apart to fit on the page.","I do not need to show them."],ok:"They are squeezed into a tiny space. I need an inset or scale break.",hint:"Look at your answer for the percent. Is 2% a lot of room?",hint2:"Cards that overlap in a tiny space are hard to read.",why:"<div class='why'>That is why the task says: enlarge the crowded early part with a clearly labeled <b>inset</b> or <b>scale break</b>.</div>"});
+
+// Step 3: defend order
+addQ("o1","order",{type:"mc",stem:"Why does <b>F</b> (protostar and disk) come before <b>D</b> (planet accretion)?",opts:["Solids need a disk to gather in.","Planets form before disks.","Disks only form after the Moon.","They are not related."],ok:"Solids need a disk to gather in.",hint:"Where do the small solid bits collect?",hint2:"Card F says the rotating disk is where planets can begin to grow.",why:"<div class='why'>The disk is the place where solids collect. No disk, no building blocks.</div>"});
+addQ("o2","order",{type:"mc",stem:"Why does the Moon (<b>G</b>) come before the Late Heavy Bombardment (<b>E</b>)?",opts:["The late-spike idea comes from Moon-rock impact ages, so the Moon must exist first.","The Moon makes the bombardment happen.","The Moon formed at 3.8 BYA.","E and G are the same event."],ok:"The late-spike idea comes from Moon-rock impact ages, so the Moon must exist first.",hint:"What did scientists test to get the late-spike idea?",hint2:"Apollo rocks from the Moon gave the impact ages.",why:"<div class='why'>Apollo impact ages from the Moon motivated the idea. The Moon forms about 4.5 BYA, before the proposed 4.1–3.8 BYA bombardment.</div>"});
+addQ("o3","order",{type:"mc",stem:"A classmate says: “The atmosphere (<b>A</b>) must wait until the bombardment (<b>E</b>) is over.” What is the best reply?",opts:["No. Gases from inside Earth and from impacts start the atmosphere about 4.5–4.4 BYA, before the proposed bombardment.","Yes. Air cannot form while impacts happen.","Yes. Air comes from the Sun after 3.8 BYA.","No. Earth never had an early atmosphere."],ok:"No. Gases from inside Earth and from impacts start the atmosphere about 4.5–4.4 BYA, before the proposed bombardment.",hint:"Impacts can bring gas, not only take it away.",hint2:"Outgassing and impacts both add gas, and they start early.",why:"<div class='why'>Do not make the atmosphere wait. It starts as Earth grows and heats.</div>"});
+
+// Step 4: card checks
+CARDS.forEach(c=>{
+  addQ("d_"+c.id,"check",{card:c.id,fullOnly:!!c.full,type:"mc",stem:"<b>When did this happen?</b>",opts:[c.date.ok].concat(c.date.bad),ok:c.date.ok,hint:c.date.hint,hint2:c.date.hint2,
+    why:()=>`<div class="why"><p><b>Evidence</b></p><ul>${c.ev.map(e=>`<li>${e}</li>`).join("")}</ul><p><b>Placement reason:</b> ${c.reason}</p><p class="src">Sources: ${srcLinks(c.src)}</p></div>`});
+  addQ("t_"+c.id,"check",{card:c.id,fullOnly:!!c.full,type:"mc",stem:"<b>Is this mostly a change, a step toward stability, or both?</b>",opts:TYPE_OPTS,keep:true,inline:true,ok:typeLabel[c.type],
+    hint:"Change means things get built, moved, or hit. Stability means things settle into steady paths. What is different after this card?",
+    hint2:"Ask two questions: What changes? What gets steadier? If both, pick “Both.”",
+    why:`<div class="why">${c.typeWhy}<p class="note">Your teacher may accept a different answer if you can defend it with evidence.</p></div>`});
+});
+
+// Step 5: inset
+addQ("w1","build",{type:"mc",stem:"<b>Pick a window for your inset.</b> The early events are crowded. Which window makes them easy to read? Look at the picture after each try.",opts:WINDOWS.map(w=>w.t),keep:true,ok:WINDOWS[1].t,
+  hint:"Look at the picture. Can you read every early card? Does the window include the Moon (G) and the atmosphere (A)?",
+  hint2:"You want the crowded start spread out, but you still need G and A inside the window.",
+  why:"<div class='why'>Best: <b>4.6 to 4.4 BYA</b>. It spreads out the crowded start and still includes the Moon and atmosphere. The later events (E, I, C) stay on the full timeline. The inset must be clearly labeled with its zoom.</div>"});
+
+addQ("x1","build",{type:"mc",stem:"Look at <b>G</b> and <b>A</b> on your timeline. What do their bands do?",opts:["They overlap. They run at the same time.","G ends, then A starts.","A comes first, then G."],ok:"They overlap. They run at the same time.",hint:"Both start around 4.5 BYA. Look at where the two bands sit.",hint2:"Does one band end before the other begins?",why:"<div class='why'>Atmosphere formation overlaps the time of the Moon-forming impact. Do not make the air wait.</div>"});
+addQ("x2","build",{type:"mc",stem:"Some of your bands are very thin. What does a thin band mean?",opts:["A short span of time, or one moment. It does not mean a small event.","The event was not important.","The date is unknown."],ok:"A short span of time, or one moment. It does not mean a small event.",hint:"The width of a band shows time, not importance.",hint2:"Look at J. It is a huge event but a very short time.",why:"<div class='why'>Band width shows how long a process took. Short does not mean small.</div>"});
+addQ("x3","build",{type:"mc",stem:"How does your timeline show that <b>E</b> is not settled science?",opts:["A dashed outline and a hypothesis label.","A bright color.","A bigger band.","It looks the same as the others."],ok:"A dashed outline and a hypothesis label.",hint:"Look at how E is drawn compared with the other bands.",hint2:"A proposed event needs a hypothesis label.",why:"<div class='why'>Keep E labeled as a hypothesis in every version.</div>"});
+
+// Step 6: lab
+addQ("p1","lab",{type:"mc",stem:"<b>Predict first.</b> Suppose all the big impacts happened in one short spike. What would Moon-rock impact ages look like?",opts:["Many ages bunched near one time","Ages spread evenly over billions of years","No ages at all","All ages in the future"],ok:"Many ages bunched near one time",hint:"A spike means “a lot at once.” What would that do to the ages?",hint2:"Lots of impacts at one time = lots of rocks with that same age.",why:"<div class='why'>Right. A spike would bunch the ages. Now look at the two ideas on the chart.</div>"});
+addQ("p2","lab",{type:"mc",stem:"<b>Test it.</b> Which fact makes the spike idea less sure?",opts:["Moon samples may be mixed, and one huge impact’s ejecta (Imbrium) may show up in many samples. Dating also has limits.","We have rocks from every part of the Moon.","Dating methods are perfect.","The Moon has no craters."],ok:"Moon samples may be mixed, and one huge impact’s ejecta (Imbrium) may show up in many samples. Dating also has limits.",hint:"Which choice points out a problem with the samples or the dating?",hint2:"If one big impact threw rock everywhere, many samples could share one age.",why:"<div class='why'>Sample mixing, Imbrium ejecta, and dating limits all make a clean spike hard to prove. A gradual decline is another idea.</div>"});
+addQ("p3","lab",{type:"mc",stem:"On your timeline, card <b>E</b> should be labeled…",opts:["Hypothesis","Proven fact","Not important"],keep:true,inline:true,ok:"Hypothesis",hint:"The card says whether a distinct spike “remains debated.”",hint2:"A proposed event needs a hypothesis label.",why:"<div class='why'>Keep E labeled as a <b>hypothesis</b>.</div>"});
+const INSTAB=["Debris moves early, so impacts can fade gradually.","A late surge of impacts is possible.","Giant planets never move."];
+addQ("i2","lab",{fullOnly:true,type:"match",stem:"<b>Predict first.</b> Match each giant-planet model to what it predicts about impacts.",rows:[{l:"Early instability model",ok:INSTAB[0]},{l:"Delayed instability model",ok:INSTAB[1]}],choices:INSTAB,hint:"“Early” shaking moves debris early. “Delayed” shaking comes later.",hint2:"Delayed model → late. Early model → debris moved early.",why:"<div class='why'>An early model can move debris early. A delayed model may predict a late impact surge. Small-body orbits help test both.</div>"});
+addQ("i3","lab",{fullOnly:true,type:"mc",stem:"What kind of evidence can test these models?",opts:["The orbits of small bodies, like asteroids","The color of the planets","The age of the Sun's light","Nothing can test them"],ok:"The orbits of small bodies, like asteroids",hint:"Which choice is about paths in space?",hint2:"Small bodies keep clues in their orbits.",why:"<div class='why'>Small-body orbital structure helps constrain the computer simulations.</div>"});
+
+// Step 7: bridges
+BR.forEach(b=>{
+  addQ(b.id+"k","bridges",{br:b.id,fullOnly:!!b.full,type:"mc",stem:"Is this link a <b>sequence</b>, an <b>overlap</b>, or a <b>hypothesis</b>?",opts:[SEQ,OVERLAP,HYP],keep:true,ok:b.kind,hint:b.kindHint,hint2:"Sequence = one ends, then the next starts. Overlap = they run together. Hypothesis = scientists still test it.",why:""});
+  [["c","cause"],["t","time"],["e","evid"]].forEach(([k,f])=>{
+    const d=b[f];
+    addQ(b.id+k,"bridges",{br:b.id,fullOnly:!!b.full,type:"mc",stem:d.stem,opts:[d.ok].concat(d.bad),ok:d.ok,hint:d.hint,hint2:d.hint2,why:""});
+  });
+});
+
+// Step 8: assessment
+const PERIODS_FULL=[["Collapse and disk growth",true],["Planet assembly and big impacts",true],["Giant planets rearrange their orbits",true],["The gas disk disperses",true],["Planet orbits restart every 1,000 years",false]];
+const PERIODS_SHORT=[["Collapse and disk growth",true],["Planet assembly and big impacts",true],["The Sun starts steady fusion",true],["The Sun turns off for a while",false],["Planet orbits restart every 1,000 years",false]];
+const CAUSE=[
+"Gravity pulls a cloud inward and spin flattens it. Evidence: young disks and old meteorite bits.",
+"Solids collide and stick, and giant impacts build worlds. Evidence: Moon samples and collision models.",
+"Giant planets interact with each other and the disk, and shift. Evidence: small-body orbits.",
+"The young Sun gets hot and dense inside. Evidence: star observations and models.",
+"Planets throw Earth out of the solar system. Evidence: none."];
+addQ("as1","assess",{type:"multi",need:3,stem:"<b>Pick exactly 3 major change periods</b> to explain. (Pick the 3 best supported.)",opts:()=>full()?PERIODS_FULL.map(p=>p[0]):PERIODS_SHORT.map(p=>p[0]),valid:()=>(full()?PERIODS_FULL:PERIODS_SHORT).filter(p=>p[1]).map(p=>p[0]),hint:"Pick periods where the solar system really changed, and you can name a cause and evidence.",hint2:"Two choices are not real periods. Remove them.",why:"<div class='why'>Good choices: collapse and disk growth, planet assembly and impacts, and orbital rearrangement. Other supported choices are fine.</div>"});
+addQ("as2","assess",{type:"match",stem:"<b>Match</b> each change period to its cause and evidence.",rows:()=>full()?[{l:"Collapse and disk growth",ok:CAUSE[0]},{l:"Planet assembly and big impacts",ok:CAUSE[1]},{l:"Giant planets rearrange their orbits",ok:CAUSE[2]}]:[{l:"Collapse and disk growth",ok:CAUSE[0]},{l:"Planet assembly and big impacts",ok:CAUSE[1]},{l:"The Sun starts steady fusion",ok:CAUSE[3]}],choices:()=>full()?[CAUSE[0],CAUSE[1],CAUSE[2],CAUSE[4]]:[CAUSE[0],CAUSE[1],CAUSE[3],CAUSE[4]],hint:"Match the cause word to the period: gravity and spin, collisions, moving giants, or the Sun heating up.",hint2:"One choice is not real. It says “Evidence: none.”",why:"<div class='why'>Each period needs a cause <b>and</b> evidence.</div>"});
+addQ("as3","assess",{type:"mc",stem:"When did the most intense bombardment decline? (Use the traditional classroom milestone.)",opts:["About 3.8 BYA. It is a broad change, not one hard date.","About 4.5 BYA","About 1 BYA","Exactly 3.8 BYA. All scientists agree."],ok:"About 3.8 BYA. It is a broad change, not one hard date.",hint:"Think of your card I.",hint2:"The date is a classroom milestone. Not everyone agrees on one exact date.",why:"<div class='why'>About 3.8 BYA, as a broad transition. There is no universal endpoint.</div>"});
+addQ("as4","assess",{type:"mc",stem:"Why did fewer big impacts matter?",opts:["Surfaces and air could last longer without being reset.","All planet orbits became fixed forever.","All impacts stopped.","The Sun started fusion."],ok:"Surfaces and air could last longer without being reset.",hint:"What happens to a surface when big crashes keep hitting it?",hint2:"Fewer crashes means less resetting.",why:"<div class='why'>Fewer impacts help surfaces persist. They do not prove that all orbits are stable.</div>"});
+const TFS=[["Fewer impacts proves that every planet orbit is stable.","False","Fewer impacts is one measure. Orbits are a different question."],["The impact rate and orbit stability answer different questions.","True","Crater counts and orbit models are different kinds of evidence."],["Big impacts can still happen today.","True","The impact rate does not fall to zero."],["Stable orbits mean nothing in the solar system changes.","False","Surfaces, air, and small bodies still change."]];
+TFS.forEach((t,i)=>addQ("tf"+(i+1),"assess",{type:"mc",stem:"<b>True or false?</b> "+t[0],opts:["True","False"],keep:true,inline:true,ok:t[1],hint:"Think about card C and card I.",hint2:"Separate “fewer impacts” from “stable orbits.”",why:"<div class='why'>"+t[2]+"</div>"}));
+addQ("f1","assess",{type:"mc",stem:"Predict one <b>internal</b> source of future change.",opts:["The Sun's energy output changes as it ages. That changes the inner solar system.","Planets run out of gas and stop orbiting.","The Moon gets heavy and falls.","Impacts stop and the Sun turns off."],ok:"The Sun's energy output changes as it ages. That changes the inner solar system.",hint:"What inside the solar system keeps changing as it gets older?",hint2:"Think about the Sun.",why:"<div class='why'>Internal: the Sun's changing energy output. Gravity between bodies can also change some orbits.</div>"});
+addQ("f2","assess",{type:"mc",stem:"About how long does that internal change take to matter?",opts:["Hundreds of millions to billions of years","About 100 years","About 10,000 years","Next year"],ok:"Hundreds of millions to billions of years",hint:"Stars change slowly.",hint2:"Pick the choice with “millions to billions.”",why:"<div class='why'>Stars age slowly. Big effects take hundreds of millions to billions of years. <span class='tag'>Added number</span> Your teacher may want a source for this timescale.</div>"});
+addQ("f3","assess",{type:"mc",stem:"Predict one <b>external</b> source of future change.",opts:["A close passing star could nudge far-away comets.","A nearby star will pull Earth out of orbit next century.","The Moon leaves orbit.","A comet hits the Sun and the Sun explodes."],ok:"A close passing star could nudge far-away comets.",hint:"External means it comes from outside the solar system.",hint2:"A star that passes close can tug on distant comets.",why:"<div class='why'>External: a close passing star could disturb distant comet orbits.</div>"});
+addQ("f4","assess",{type:"mc",stem:"About how often does that happen?",opts:["Very rare. Millions of years or longer.","Every year","Every 100 years","Never possible"],ok:"Very rare. Millions of years or longer.",hint:"Stars are very far apart.",hint2:"Pick the very long timescale.",why:"<div class='why'>Close passes are rare. <span class='tag'>Added number</span> Your teacher may want a source for this timescale.</div>"});
+addQ("f5","assess",{type:"mc",stem:"<b>True or false?</b> If a passing star disturbs comets, the major planets' orbits are disrupted too.",opts:["True","False"],keep:true,inline:true,ok:"False",hint:"Comets and planets are in different places and have different orbits.",hint2:"A disturbed comet cloud does not automatically mean disrupted planets.",why:"<div class='why'>A disturbed comet population does not automatically mean disrupted major-planet orbits.</div>"});
+
+/* helper: question access */
+const val=x=>typeof x==="function"?x():x;
+const qActive=q=>full()||!q.fullOnly;
+const qsIn=sec=>Object.values(Q).filter(q=>q.sec===sec&&qActive(q));
+const done=id=>!!(S.a[id]&&S.a[id].done);
+const cardDone=id=>done("d_"+id)&&done("t_"+id);
+const secDone=sec=>qsIn(sec).every(q=>done(q.id));
+
+/* ================= QUESTION RENDER + LOGIC ================= */
+function ans(id){return S.a[id]||(S.a[id]={w:[],done:false})}
+function qHTML(id){
+  const q=Q[id],a=S.a[id]||{w:[],done:false},nW=a.w.length;
+  const opts=val(q.opts),rows=val(q.rows),choices=val(q.choices);
+  let body="";
+  if(q.type==="mc"){
+    const order=q.keep?opts.map((_,i)=>i):shuf(opts.map((_,i)=>i),id);
+    body=`<div class="opts${q.inline?" inline":""}" role="group">`+order.map(i=>{
+      const t=opts[i],isWrong=a.w.includes(t),isRight=a.done&&t===q.ok;
+      return `<button type="button" class="opt${isWrong?" wrong":""}${isRight?" right":""}${t===q.ok?" iskey":""}" data-act="pick" data-id="${id}" data-i="${i}" ${(a.done||isWrong)?"disabled":""}>${t}</button>`}).join("")+`</div>`;
+  }else if(q.type==="num"){
+    body=`<div class="numrow"><label class="note" for="n_${id}">Your answer:</label><input type="text" inputmode="decimal" id="n_${id}" data-num="${id}" value="${esc(a.done?(q.ok):(a.v||""))}" ${a.done?"disabled":""} autocomplete="off"><span>${q.unit}</span>${a.done?"":`<button class="btn" type="button" data-act="checknum" data-id="${id}">Check</button>`}</div>`;
+  }else if(q.type==="multi"){
+    const sel=a.sel||[];
+    body=`<div class="opts" role="group">`+opts.map((t,i)=>`<button type="button" class="opt" aria-pressed="${sel.includes(i)}" data-act="tog" data-id="${id}" data-i="${i}" ${a.done?"disabled":""}>${sel.includes(i)?"☑ ":"☐ "}${t}</button>`).join("")+`</div>`+(a.done?"":`<p><button class="btn" type="button" data-act="checkmulti" data-id="${id}">Check my picks (${sel.length} of ${q.need})</button></p>`);
+  }else if(q.type==="match"){
+    const m=a.m||{},bad=a.bad||[];
+    body=`<table class="match"><tbody>`+rows.map((r,i)=>`<tr class="${a.done?"ok":(bad.includes(i)?"bad":"")}"><td style="width:34%"><b>${r.l}</b></td><td><select data-match="${id}" data-row="${i}" aria-label="Match for ${esc(r.l)}" ${a.done?"disabled":""}><option value="">Choose…</option>${choices.map(c=>`<option value="${esc(c)}"${(a.done?r.ok:m[i])===c?" selected":""}>${esc(c)}</option>`).join("")}</select></td></tr>`).join("")+`</tbody></table>`+(a.done?"":`<p><button class="btn" type="button" data-act="checkmatch" data-id="${id}">Check my matches</button></p>`);
+  }
+  let fb="";
+  if(a.done){
+    fb=`<p class="good"><b>${a.shown?"Here is the answer.":(a.w.length===0?"Correct! First try.":"Correct.")}</b></p>`+(typeof q.why==="function"?q.why():(q.why||""));
+  }else{
+    if(a.msg)fb+=`<p class="bad">${a.msg}</p>`;
+    if(nW>0)fb+=`<p class="bad"><b>Not yet.</b> Hint: ${nW>1?(q.hint2||q.hint):q.hint}</p>`+(nW>1?`<button type="button" class="link" data-act="reveal" data-id="${id}">Show me the answer</button>`:"");
+  }
+  return `<div class="q" data-qid="${id}"><p class="stem">${q.stem}</p>${body}<div class="fb" tabindex="-1" aria-live="polite">${fb}</div></div>`;
+}
+const QS=ids=>ids.map(qHTML).join("");
+
+function pickText(id){
+  const q=Q[id],a=S.a[id];if(!a||!a.done)return "(not answered)";
+  let t="";
+  if(q.type==="mc")t=q.ok;
+  else if(q.type==="num")t=q.ok+" "+q.unit;
+  else if(q.type==="multi")t=(a.sel||[]).map(i=>val(q.opts)[i]).join("; ");
+  else if(q.type==="match")t=val(q.rows).map(r=>r.l+" = "+r.ok).join(" | ");
+  return strip(t)+(a.shown?" (answer shown)":"");
+}
+
+const A={}; // click actions
+A.pick=b=>{const q=Q[b.dataset.id],a=ans(b.dataset.id),t=val(q.opts)[+b.dataset.i];if(a.done)return;a.last=t;a.msg="";if(t===q.ok){a.done=true}else if(!a.w.includes(t))a.w.push(t);rr(b.dataset.id)};
+A.reveal=b=>{const q=Q[b.dataset.id],a=ans(b.dataset.id);a.done=true;a.shown=true;if(q.type==="match"){a.m={};val(q.rows).forEach((r,i)=>a.m[i]=r.ok)}if(q.type==="multi"){const v=q.valid();a.sel=val(q.opts).map((t,i)=>v.includes(t)?i:-1).filter(i=>i>=0).slice(0,q.need)}rr(b.dataset.id)};
+A.checknum=b=>{const id=b.dataset.id,q=Q[id],a=ans(id),inp=$(`[data-num="${id}"]`);a.v=inp?inp.value:"";const x=parseFloat(String(a.v).replace(/[,%\s]/g,""));a.msg="";
+  if(isNaN(x)){a.msg="Type a number first.";}
+  else if(Math.abs(x-q.ok)<=q.tol){a.done=true}
+  else a.w.push(String(a.v));
+  rr(id)};
+A.tog=b=>{const id=b.dataset.id,a=ans(id),i=+b.dataset.i;a.sel=a.sel||[];const k=a.sel.indexOf(i);if(k>=0)a.sel.splice(k,1);else a.sel.push(i);a.msg="";rr(id,"[data-act=tog][data-i='"+i+"']")};
+A.checkmulti=b=>{const id=b.dataset.id,q=Q[id],a=ans(id),sel=a.sel||[];a.msg="";
+  if(sel.length!==q.need){a.msg="Pick exactly "+q.need+".";}
+  else{const v=q.valid(),texts=sel.map(i=>val(q.opts)[i]);if(texts.every(t=>v.includes(t)))a.done=true;else a.w.push(texts.join("|"))}
+  rr(id)};
+A.checkmatch=b=>{const id=b.dataset.id,q=Q[id],a=ans(id),m=a.m||{},rows=val(q.rows);a.msg="";
+  if(rows.some((r,i)=>!m[i])){a.msg="Choose a match for every row.";a.bad=[];}
+  else{a.bad=rows.map((r,i)=>m[i]===r.ok?-1:i).filter(i=>i>=0);if(!a.bad.length)a.done=true;else a.w.push("x")}
+  rr(id)};
+
+/* ================= TIMELINE SVG ================= */
+function lModel(){return S.lm==="late"?"late":"early"}
+function segs(c){
+  if(c.id==="L"){return lModel()==="early"?[{s:4.55,e:4.5},{s:4.1,e:3.9,alt:true}]:[{s:4.1,e:3.9},{s:4.55,e:4.5,alt:true}]}
+  return c.segs.map(x=>({s:x[0],e:x[1]}));
+}
+function fmtT(v,span){return span<0.1?v.toFixed(3):span<1?v.toFixed(2):v.toFixed(1)}
+function refOf(c){if(c.id==="L")return S.lm==="late"?{s:4.1,e:3.9,tol:0.15}:{s:4.55,e:4.5,tol:0.05};return{s:c.segs[0][0],e:c.segs[0][1],tol:TOL[c.id]}}
+function fmtRange(c){const r=refOf(c);if(c.id==="C")return "from about 3.8 BYA (a fuzzy start) to today (0)";return "about "+r.s+" to "+r.e+" BYA"}
+function tlSVG(o){
+  const W=960,LW=205,R=26,top=40,rh=30,cs=o.rows,H=top+cs.length*rh+34,pw=W-LW-R,span=o.hi-o.lo;
+  const X=t=>LW+(o.hi-t)/span*pw;
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(o.label)}" font-family="system-ui,Segoe UI,Arial,sans-serif">
+<defs><pattern id="pBoth" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#0e7c7b"/><rect x="4" width="4" height="8" fill="#a3265f"/></pattern></defs>
+<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>`;
+  cs.forEach((c,i)=>{if(o.sel===c.id)s+=`<rect x="0" y="${top+i*rh}" width="${W}" height="${rh}" fill="#fff3c4"/>`});
+  for(let k=0;k<=4;k++){
+    const v=o.hi-k*span/4,x=X(v);
+    s+=`<line x1="${x}" y1="${top-8}" x2="${x}" y2="${H-26}" stroke="#d5dce8"/>`;
+    const lab=(v<=1e-9)?"Today":fmtT(v,span);
+    s+=`<text x="${x}" y="${top-14}" font-size="13" text-anchor="${k===0?"start":k===4?"end":"middle"}" fill="#47566e">${lab}</text>`;
+  }
+  s+=`<text x="${LW}" y="${H-8}" font-size="12.5" fill="#47566e">BYA = billion years ago. Larger BYA = older. Older is on the left.</text>`;
+  if(o.mark){const x1=X(o.mark.hi),x2=X(o.mark.lo);s+=`<rect x="${x1}" y="${top-6}" width="${Math.max(x2-x1,3)}" height="${cs.length*rh+6}" fill="#e9b63c" fill-opacity="0.18" stroke="#b98a12" stroke-width="2" stroke-dasharray="6 4"/><text x="${x1+4}" y="${H-26}" font-size="12.5" fill="#7a5a00" font-weight="700">Inset window</text>`}
+  cs.forEach((c,i)=>{
+    const y=top+i*rh,t=S.tl[c.id],lc=t?"#12203a":"#8a97ab";
+    s+=`<line x1="0" y1="${y+rh}" x2="${W}" y2="${y+rh}" stroke="#eef1f6"/>`;
+    s+=`<text x="8" y="${y+20}" font-size="14.5" fill="${lc}" font-weight="700">${c.id}</text><text x="30" y="${y+20}" font-size="14" fill="${lc}">${esc(c.short)}${t&&t.hyp?" (hypothesis)":""}${c.id==="L"&&t?" (model)":""}</text>`;
+    if(!t){s+=`<text x="${LW+8}" y="${y+20}" font-size="12.5" fill="#8a97ab" font-style="italic">not placed yet</text>`}
+    else{
+      const a=Math.min(t.s,o.hi),b=Math.max(t.e,o.lo);
+      if(a<=b){s+=`<text x="${LW+8}" y="${y+20}" font-size="12.5" fill="#8a97ab" font-style="italic">placed, but outside this view</text>`}
+      else{
+        const x1=X(a),x2=X(b),w=Math.max(x2-x1,6);
+        const fill=t.type?(t.type==="change"?"#a3265f":t.type==="stability"?"#0e7c7b":"url(#pBoth)"):"#8a97ab";
+        s+=`<rect x="${x1}" y="${y+5}" width="${w}" height="18" rx="3" fill="${fill}" ${t.hyp?`fill-opacity="0.6" stroke="#12203a" stroke-width="2" stroke-dasharray="5 3"`:""}/>`;
+        if(t.ok)s+=`<text x="${x1+w+6}" y="${y+20}" font-size="15" fill="#146c3a" font-weight="700">✓</text>`;
+      }
+    }
+    if(o.ghost&&t&&t.target){const r=refOf(c),a=Math.min(r.s,o.hi),b=Math.max(r.e,o.lo);if(a>b){const x1=X(a),x2=X(b);s+=`<rect x="${x1-2}" y="${y+2}" width="${Math.max(x2-x1,6)+4}" height="24" rx="4" fill="none" stroke="#b98a12" stroke-width="2.5" stroke-dasharray="4 3"/>`}}
+    if(o.interactive)s+=`<rect data-act="selrow" data-id="${c.id}" x="0" y="${y}" width="${W}" height="${rh}" fill="transparent" style="cursor:pointer"/>`;
+  });
+  if(o.lo<=1e-9){const x=X(0);s+=`<line x1="${x}" y1="${top-8}" x2="${x}" y2="${H-26}" stroke="#e9b63c" stroke-width="3"/>`}
+  return s+`</svg>`;
+}
+function winMetrics(w){
+  const span=w.hi-w.lo,out=[],thin=[],ins=[];
+  cardsInMode().forEach(c=>{let best=0,ov=false;segs(c).filter(s=>!s.alt).forEach(s=>{const a=Math.min(s.s,w.hi),b=Math.max(s.e,w.lo);if(a>b){ov=true;best=Math.max(best,(a-b)/span)}});
+    if(!ov)out.push(c.id);else{ins.push(c.id);if(best<0.03)thin.push(c.id)}});
+  return{out,thin,ins,zoom:Math.round(4.6/span*10)/10};
+}
+const legendHTML=`<div class="legend" aria-label="Legend"><span><i class="sw-chg"></i>Change</span><span><i class="sw-stab"></i>Increasing stability</span><span><i class="sw-both"></i>Both</span><span><i class="sw-unk"></i>No type chosen yet</span><span><i class="sw-hyp"></i>Hypothesis or other model (dashed)</span></div>`;
+function curWindow(){const a=S.a.w1;if(!a)return null;const t=a.done?Q.w1.ok:a.last;return WINDOWS.find(w=>w.t===t)||null}
+function ordered(){return cardsInMode()} // CARDS is already in key order
+
+function impactSVG(show){
+  const W=600,H=250,L=48,R=14,T=14,B=44,pw=W-L-R,ph=H-T-B,t0=4.6,t1=3.0;
+  const X=t=>L+(t0-t)/(t0-t1)*pw,Y=v=>T+(1-v)*ph;
+  const grad=t=>0.85*Math.exp(-(t0-t)/0.45);
+  const spike=t=>0.07+0.1*Math.exp(-(t0-t)/0.9)+0.78*Math.exp(-Math.pow((t-3.9)/0.09,2));
+  const path=f=>{let d="";for(let t=t0;t>=t1-1e-9;t-=0.01)d+=(d?"L":"M")+X(t).toFixed(1)+" "+Y(f(t)).toFixed(1);return d};
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic chart of two ideas about how often big impacts happened over time" font-family="system-ui,Segoe UI,Arial,sans-serif"><rect width="${W}" height="${H}" fill="#fff"/>`;
+  s+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${H-B}" stroke="#47566e"/><line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="#47566e"/>`;
+  [4.6,4.2,3.8,3.4,3.0].forEach(t=>{s+=`<text x="${X(t)}" y="${H-B+18}" font-size="13" text-anchor="middle" fill="#47566e">${t.toFixed(1)}</text>`});
+  s+=`<text x="${(L+W-R)/2}" y="${H-8}" font-size="13" text-anchor="middle" fill="#47566e">BYA (older on the left)</text>`;
+  s+=`<text x="14" y="${(T+H-B)/2}" font-size="13" text-anchor="middle" fill="#47566e" transform="rotate(-90 14 ${(T+H-B)/2})">How often big impacts happen</text>`;
+  if(show==="spike"||show==="both")s+=`<path d="${path(spike)}" fill="none" stroke="#a3265f" stroke-width="3.5"/><text x="${X(3.9)+8}" y="${Y(0.85)}" font-size="13.5" fill="#a3265f" font-weight="700">Spike idea (peak near 3.9)</text>`;
+  if(show==="gradual"||show==="both")s+=`<path d="${path(grad)}" fill="none" stroke="#0e7c7b" stroke-width="3.5" stroke-dasharray="${show==="both"?"9 5":"0"}"/><text x="${X(4.5)+10}" y="${Y(0.62)}" font-size="13.5" fill="#0e7c7b" font-weight="700">Gradual decline idea</text>`;
+  return s+`</svg>`;
+}
+
+/* ================= VIEWS ================= */
+const STEPS=[{k:"start",n:"Start"},{k:"math",n:"Time math",sec:"math"},{k:"order",n:"Predict the order",sec:"order"},{k:"check",n:"Check each event",sec:"check"},{k:"build",n:"Build the timeline",sec:"build"},{k:"lab",n:"Uncertainty lab",sec:"lab"},{k:"bridges",n:"Bridges",sec:"bridges"},{k:"assess",n:"Assessment",sec:"assess"},{k:"turnin",n:"Turn in"}];
+function stepDone(i){
+  const st=STEPS[i];
+  if(st.k==="start")return S.started;
+  if(st.k==="order")return S.orderDone&&secDone("order");
+  if(st.k==="lab")return secDone("lab")&&(!full()||!!S.lm);
+  if(st.k==="build")return secDone("build")&&allPlaced();
+  if(st.sec)return secDone(st.sec);
+  return false;
+}
+const V={};
+
+V.start=()=>`
+<div class="panel">
+  <h1>Solar system timeline investigation</h1>
+  <p class="lead">Research dates, defend placements, and explain the changes between events.</p>
+  <div class="goal"><b>Your task</b><p>Construct a timeline from 4.6 billion years ago to the present. Explain how the solar system changed and how it became relatively stable.</p></div>
+  <h3>How this works</h3>
+  <ol>
+    <li>Do the time math.</li>
+    <li>Predict the order of the events.</li>
+    <li>Check the date of each event. Get hints right away.</li>
+    <li>Build your timeline on the screen.</li>
+    <li>Test two big ideas that scientists still debate.</li>
+    <li>Build the bridges between events.</li>
+    <li>Finish the assessment. Then turn it in.</li>
+  </ol>
+  <p class="note">Your work saves on this device only. Nothing is sent anywhere. Use the <b>Word bank</b> button at the top any time.</p>
+</div>
+<div class="panel">
+  <h2>Before you start</h2>
+  <p><label for="nm"><b>Your name</b></label><br><input type="text" id="nm" data-name value="${esc(S.name)}" autocomplete="off" placeholder="First and last name"></p>
+  <fieldset style="border:0;padding:0;margin:12px 0"><legend><b>Lesson length</b> (your teacher will tell you)</legend>
+    <div class="opts">
+      <label class="opt" style="cursor:pointer"><input type="radio" name="mode" value="full" ${full()?"checked":""}> <b>Full:</b> all 12 cards</label>
+      <label class="opt" style="cursor:pointer"><input type="radio" name="mode" value="short" ${!full()?"checked":""}> <b>Short:</b> 9 cards (no J, B, or L)</label>
+    </div>
+  </fieldset>
+  <div class="toolbar"><button class="btn" data-act="begin">Start the investigation</button><button class="btn alt" data-act="reset">Erase my work and start over</button></div>
+</div>`;
+
+V.math=()=>`
+<div class="panel"><h2>Step 2. Time math</h2>
+<p class="lead">Do the math first. Then use it to place events.</p>
+<div class="goal"><b>Show time honestly.</b><p><b>BYA</b> means billion years ago. <b>MYA</b> means million years ago. Larger BYA values are older.</p></div>
+${QS(qsIn("math").map(q=>q.id))}
+</div>`;
+
+function ensureOrder(){
+  const ids=cardsInMode().map(c=>c.id);
+  if(!S.order||S.order.length!==ids.length||ids.some(i=>!S.order.includes(i))){S.order=shuf(ids,"order"+S.mode);S.orderDone=false;S.orderChecks=0;S.orderMsg=[];S.orderShown=false}
+}
+V.order=()=>{
+  ensureOrder();
+  const rows=S.order.map((id,i)=>{const c=BYID[id];return `<li><span class="rank">${i+1}</span><span class="badge" aria-hidden="true">${c.id}</span><span class="txt"><b>${c.t}</b>${c.simple}</span><span class="mv"><button type="button" data-act="mv" data-d="-1" data-i="${i}" aria-label="Move ${esc(c.t)} up" ${(S.orderDone||i===0)?"disabled":""}>▲</button><button type="button" data-act="mv" data-d="1" data-i="${i}" aria-label="Move ${esc(c.t)} down" ${(S.orderDone||i===S.order.length-1)?"disabled":""}>▼</button></span></li>`}).join("");
+  const msgs=S.orderMsg&&S.orderMsg.length?`<div class="fb" tabindex="-1" aria-live="polite"><p class="bad"><b>${S.orderMsg.length>1?"Some cards need another look.":"One card pair needs another look."}</b></p><ul>${S.orderMsg.map(m=>`<li>${m}</li>`).join("")}</ul></div>`:"";
+  const ok=S.orderDone?`<div class="fb" tabindex="-1"><p class="good"><b>${S.orderShown?"Here is one working order.":"No broken rules!"}</b> Many events overlap, so more than one order can work. Your timeline will show the overlap as bands.</p></div>`:"";
+  return `<div class="panel"><h2>Step 3. Predict the order</h2>
+  <p class="lead">The letters do not give the order. Use the card clues. Put the oldest event at the top.</p>
+  <ol class="note"><li>Read each card.</li><li>Tap ▲ or ▼ to move it.</li><li>Tap <b>Check my order</b>.</li></ol>
+  <ol class="order" aria-label="Cards. Oldest at the top.">${rows}</ol>
+  ${S.orderDone?"":`<div class="toolbar"><button class="btn" data-act="chkorder">Check my order</button>${S.orderChecks>=3?`<button class="btn alt" data-act="showorder">Show me a working order</button>`:""}</div>`}
+  ${msgs}${ok}</div>
+  ${S.orderDone?`<div class="panel"><h3 style="margin-top:0">Defend your order</h3>${QS(qsIn("order").map(q=>q.id))}</div>`:""}`;
+};
+
+function srcDetails(c){return `<details><summary>Original card wording from your teacher</summary><p><b>Card ${c.id}. ${c.t}</b></p><p>${esc(c.desc)}</p><p><b>RESEARCH TO PLACE</b> ${esc(c.rtp)}</p><p><b>RESEARCH A BRIDGE</b> ${esc(c.rab)}</p></details>`}
+V.check=()=>{
+  const cs=cardsInMode();if(!cs.find(c=>c.id===S.cur))S.cur=cs[0].id;
+  const c=BYID[S.cur],idx=cs.findIndex(x=>x.id===c.id);
+  return `<div class="panel"><h2>Step 4. Check each event</h2>
+  <p class="lead">Pick a card. Answer two questions. Get hints right away.</p>
+  <div class="chips" role="group" aria-label="Cards">${cs.map(x=>`<button type="button" class="chip ${x.id===S.cur?"on":""} ${cardDone(x.id)?"ok":""}" data-act="card" data-id="${x.id}" aria-label="Card ${x.id}: ${esc(x.short)}${cardDone(x.id)?", done":""}" ${x.id===S.cur?'aria-current="true"':""}>${x.id}</button>`).join("")}</div>
+  <h3 style="margin-top:0">${c.id}. ${c.t}</h3>
+  <p>${c.simple}</p>
+  ${c.id==="H"?`<div class="goal"><b>Teacher demo card.</b> Add 4.6 BYA together as a class.</div>`:""}
+  ${srcDetails(c)}
+  ${QS(["d_"+c.id,"t_"+c.id])}
+  <div class="toolbar">${idx>0?`<button class="btn alt" data-act="card" data-id="${cs[idx-1].id}">◀ Card ${cs[idx-1].id}</button>`:""}${idx<cs.length-1?`<button class="btn" data-act="card" data-id="${cs[idx+1].id}">Card ${cs[idx+1].id} ▶</button>`:`<button class="btn" data-act="go" data-s="4">Build the timeline ▶</button>`}</div>
+  <p class="note">Cards finished: ${cs.filter(x=>cardDone(x.id)).length} of ${cs.length}</p></div>`;
+};
+
+/* ---- Step 5 builder ---- */
+const r4=x=>Math.round(x*10000)/10000;
+function dView(){const w=curWindow();if(S.bview==="inset"&&w&&w.lo>0)return{hi:w.hi,lo:w.lo};return{hi:4.6,lo:0}}
+function vStep(v){const sp=v.hi-v.lo;return sp<=0.06?0.001:sp<=0.25?0.005:0.05}
+const fmtB=(x,st)=>x<=0.0005?"Today":x.toFixed(st<0.01?3:2)+" BYA";
+const allPlaced=()=>cardsInMode().every(c=>S.tl[c.id]&&S.tl[c.id].ok);
+function buildSVGs(){
+  const cs=ordered(),w=curWindow(),useInset=!!(w&&w.lo>0);
+  const f=tlSVG({hi:4.6,lo:0,rows:cs,mark:useInset?w:null,sel:S.sel5,ghost:true,interactive:true,label:"Your full timeline from 4.6 billion years ago to today"});
+  let i="";
+  if(useInset){const m=winMetrics(w);i=tlSVG({hi:w.hi,lo:w.lo,rows:cs.filter(c=>!m.out.includes(c.id)),sel:S.sel5,ghost:true,interactive:true,label:"Your inset timeline "+w.t})}
+  return{f,i};
+}
+function trayHTML(){return `<div class="chips" role="group" aria-label="Card tray">${cardsInMode().map(c=>{const t=S.tl[c.id];return `<button type="button" class="chip ${c.id===S.sel5?"on":""} ${t&&t.ok?"ok":""}" data-act="selrow" data-id="${c.id}" aria-label="Card ${c.id}: ${esc(c.short)}${t?(t.ok?", placed and checked":", placed, not checked"):", not placed"}" ${c.id===S.sel5?'aria-current="true"':""}>${c.id}</button>`}).join("")}</div>`}
+function ctlHTML(){
+  const cs=cardsInMode();if(!S.sel5||!cs.some(c=>c.id===S.sel5))S.sel5=cs[0].id;
+  const c=BYID[S.sel5],t=S.tl[c.id],w=curWindow(),canInset=!!(w&&w.lo>0);
+  if(S.bview==="inset"&&!canInset)S.bview="full";
+  const d=done("d_"+c.id);
+  let h=`<h3 style="margin-top:0">Card ${c.id}. ${c.t}</h3><p>${c.simple}</p>`;
+  h+=d?`<details><summary>My evidence from Step 4</summary><div class="why"><p><b>${strip(c.date.ok)}</b></p><ul>${c.ev.map(e=>`<li>${e}</li>`).join("")}</ul></div></details>`:`<p class="note">Tip: finish card ${c.id} in Step 4 first. Then your evidence shows here. <button type="button" class="link" data-act="card" data-id="${c.id}" data-go4="1">Go to Step 4</button></p>`;
+  if(!t){return h+`<p><button class="btn" type="button" data-act="addcard">Add card ${c.id} to the timeline</button></p>`}
+  const v=dView(),st=vStep(v),N=Math.round((v.hi-v.lo)/st),k=x=>Math.max(0,Math.min(N,Math.round((v.hi-x)/st)));
+  const outS=t.s>v.hi+1e-9||t.s<v.lo-1e-9,outE=t.e>v.hi+1e-9||t.e<v.lo-1e-9;
+  h+=`<div class="toolbar" role="group" aria-label="Place in which view"><button type="button" class="btn ${S.bview==="full"?"":"alt"}" data-act="bview" data-v="full">Place in: Full timeline</button><button type="button" class="btn ${S.bview==="inset"?"":"alt"}" data-act="bview" data-v="inset" ${canInset?"":"disabled"}>Place in: Inset</button></div>${canInset?"":`<p class="note">Choose an inset in Part A to unlock the Inset view.</p>`}`;
+  h+=`<p><label for="sl_s"><b>Starts</b> (the older end): <b id="lb_s">${fmtB(t.s,st)}</b></label><br><input type="range" id="sl_s" data-sl="s" min="0" max="${N}" step="1" value="${k(t.s)}" style="width:100%;height:40px"></p>
+  <p><label for="sl_e"><b>Ends</b> (the newer end): <b id="lb_e">${fmtB(t.e,st)}</b></label><br><input type="range" id="sl_e" data-sl="e" min="0" max="${N}" step="1" value="${k(t.e)}" style="width:100%;height:40px"></p>
+  <p class="note" style="display:flex;justify-content:space-between"><span>◀ older: ${fmtB(v.hi,st)}</span><span>newer: ${fmtB(v.lo,st)} ▶</span></p>
+  <p class="note" id="outnote">${(outS||outE)?"Part of this card is outside this view. Switch the view, or move a slider to bring it in.":""}</p>`;
+  h+=`<p class="stem">Type</p><div class="opts inline" role="group">${[["change","Change"],["stability","Increasing stability"],["both","Both"]].map(a=>`<button type="button" class="opt" aria-pressed="${t.type===a[0]}" data-act="settype" data-v="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+  h+=`<p><label class="opt" style="cursor:pointer;display:block;margin-top:10px"><input type="checkbox" data-hyp ${t.hyp?"checked":""}> Mark as a <b>hypothesis</b> (dashed outline)</label></p>`;
+  if(c.id==="L")h+=`<p class="stem">Which model are you using for L?</p><div class="opts inline" role="group"><button type="button" class="opt" aria-pressed="${S.lm==="early"}" data-act="lm5" data-v="early">Early model</button><button type="button" class="opt" aria-pressed="${S.lm==="late"}" data-act="lm5" data-v="late">Delayed model</button></div>${S.lm==="late"?`<p class="note"><b>A late placement needs a cited alternative.</b> Write your source in your activity document.</p>`:""}`;
+  let fb="";
+  if(t.ok)fb=`<p class="good"><b>${t.shown?"Here is the answer.":"Checked! This card is placed well."}</b></p><div class="why"><p><b>Placement reason:</b> ${c.reason}</p></div>`;
+  else if(t.msg&&t.msg.length)fb=`<p class="bad"><b>Not yet.</b></p><ul>${t.msg.map(m=>`<li>${m}</li>`).join("")}</ul>`+(t.tries>=3?`<button type="button" class="link" data-act="show5">Show me the answer</button>`:"");
+  h+=`<div class="toolbar"><button class="btn" type="button" data-act="chk5">Check my card</button><button class="btn alt" type="button" data-act="rem5">Remove from timeline</button></div><div class="fb" id="fb5" tabindex="-1" aria-live="polite">${fb}</div>`;
+  return h;
+}
+function checkBuild(id){
+  const c=BYID[id],t=S.tl[id];if(!t)return;
+  if(id==="L"&&!S.lm){t.msg=["Choose the <b>Early</b> or <b>Delayed</b> model for card L first."];t.ok=false;return}
+  const r=refOf(c),P=[];let ds,de,okS,okE;
+  if(id==="C"){ds=t.s>0.3?t.s-3.8:0;okS=Math.abs(ds)<=0.4;de=t.e;okE=t.e<=0.05}
+  else{ds=t.s-r.s;de=t.e-r.e;okS=Math.abs(ds)<=r.tol;okE=Math.abs(de)<=r.tol}
+  if(!okS)P.push(ds>0?"Your <b>start</b> is too old. It sits too far left. Larger BYA is older.":"Your <b>start</b> is too young. It sits too far right.");
+  if(!okE)P.push(de>0?"Your <b>end</b> is too old. It sits too far left.":"Your <b>end</b> is too young. It sits too far right.");
+  if((!okS||!okE)&&id!=="C"&&(r.s-r.e)<0.06&&t.view!=="inset")P.push("This card covers a very short time. Place it in the <b>Inset</b> so you can be exact.");
+  if(!t.type)P.push("Pick a <b>type</b>: change, increasing stability, or both.");
+  else if(t.type!==c.type)P.push("Your <b>type</b> needs another look. Hint: ask what changes and what gets steadier."+(t.tries>=1?" "+c.typeWhy:""));
+  if(id==="E"&&!t.hyp)P.push("Card E is debated. Mark it as a <b>hypothesis</b>.");
+  if(id!=="E"&&id!=="L"&&t.hyp)P.push("This card is not a hypothesis. Turn the label off.");
+  t.tries=(t.tries||0)+1;
+  if(P.length){t.ok=false;t.msg=P;if(t.tries>=2){t.target=true;P.push("Target: "+fmtRange(c)+". The gold dashed box on the timeline shows it.")}}
+  else{t.ok=true;t.msg=[];t.target=false}
+}
+function liveBuild(){
+  const sv=buildSVGs(),a=$("#tlFull"),b=$("#tlInset"),tr=$("#tray5");
+  if(a)a.innerHTML=sv.f;if(b&&sv.i)b.innerHTML=sv.i;if(tr)tr.innerHTML=trayHTML();
+  const t=S.tl[S.sel5];if(!t)return;
+  const v=dView(),st=vStep(v),N=Math.round((v.hi-v.lo)/st),k=x=>Math.max(0,Math.min(N,Math.round((v.hi-x)/st)));
+  const ss=$("#sl_s"),se=$("#sl_e");if(ss)ss.value=k(t.s);if(se)se.value=k(t.e);
+  const ls=$("#lb_s"),le=$("#lb_e");if(ls)ls.textContent=fmtB(t.s,st);if(le)le.textContent=fmtB(t.e,st);
+  const fb=$("#fb5");if(fb)fb.innerHTML=`<p class="bad">You changed this card. Tap <b>Check my card</b>.</p>`;
+}
+V.build=()=>{
+  const cs=ordered(),w=curWindow(),useInset=!!(w&&w.lo>0),okc=cs.filter(c=>S.tl[c.id]&&S.tl[c.id].ok).length,placed=cs.filter(c=>S.tl[c.id]).length;
+  let metrics="";
+  if(w){const m=winMetrics(w);metrics=`<div class="why"><p><b>What your window does</b> (zoom ×${m.zoom})</p><ul><li>Cards inside the window: <b>${m.ins.join(", ")||"none"}</b></li><li>Cards outside the window (place these on the full timeline): <b>${m.out.join(", ")||"none"}</b></li><li>Cards too thin to read in the window: <b>${m.thin.join(", ")||"none"}</b></li></ul></div>`}
+  const sv=buildSVGs();
+  if(!S.sel5||!cs.some(c=>c.id===S.sel5))S.sel5=cs[0].id;
+  return `<div class="panel"><h2>Step 5. Build the timeline</h2>
+  <p class="lead">You build your timeline right here on the screen. You place every card yourself. Then you check it.</p>
+  <h3>Part A. Set your scale</h3>${QS(["w1"])}${metrics}</div>
+  <div class="panel"><h3 style="margin-top:0">Part B. Directions: how to build your timeline</h3>
+  <ol>
+    <li>Tap a card letter in the <b>card tray</b>. You can also tap a row on the timeline.</li>
+    <li>Tap <b>Add card to the timeline</b>. A gray band appears on its row.</li>
+    <li>Pick your view: <b>Full timeline</b> or <b>Inset</b>.</li>
+    <li>Slide <b>Starts</b> to the <b>older</b> end of the card's date range.</li>
+    <li>Slide <b>Ends</b> to the <b>newer</b> end of the date range.</li>
+    <li>Tap a <b>type</b>: Change, Increasing stability, or Both. The band gets its color.</li>
+    <li>Tap the <b>hypothesis</b> box only if the card is debated. The band gets a dashed outline.</li>
+    <li>For card L, tap the <b>Early</b> or <b>Delayed</b> model.</li>
+    <li>Tap <b>Check my card</b>. Read the hint. Fix your band. Check again.</li>
+    <li>Repeat for every card. A green ✓ means the card is done.</li>
+  </ol>
+  <div class="goal"><b>Tips</b><ul><li>Older is on the <b>left</b>. A larger BYA number is older.</li><li>Very short cards need the <b>Inset</b>. The full timeline is too small to be exact.</li><li>Bands can overlap. A process can keep going after another begins.</li><li>A thin band means a short span of time. It does not mean a small event.</li></ul></div></div>
+  <div class="panel"><h3 style="margin-top:0">Part C. Place the cards</h3>
+  <p><b id="prog5">${okc}</b> of ${cs.length} cards checked. ${placed-okc>0?`${placed-okc} placed but not checked.`:""}</p>
+  <div id="tray5">${trayHTML()}</div>
+  ${legendHTML}
+  <h3>Full timeline: 4.6 BYA to today</h3>
+  <div class="scroll" id="tlFull">${sv.f}</div>
+  ${useInset?`<h3>Inset: ${w.t}</h3><p class="note">This is a zoom ×${winMetrics(w).zoom} of the left edge of the full timeline.</p><div class="scroll" id="tlInset">${sv.i}</div>`:`<p class="note">Choose an inset in Part A to see the inset timeline here.</p>`}
+  <div class="panel" style="background:#fbfcff;margin-top:16px" id="ctl5">${ctlHTML()}</div></div>
+  ${okc===cs.length?`<div class="panel"><h3 style="margin-top:0">Part D. Look at your finished timeline</h3>${QS(["x1","x2","x3"])}</div>`:""}`;
+};
+
+V.lab=()=>{
+  const p1=done("p1");
+  let h=`<div class="panel"><h2>Step 6. Uncertainty lab</h2><p class="lead">If sources disagree, record both ideas and explain your choice. A proposed event needs a hypothesis label.</p>
+  <h3>Part A. Spike or gradual decline?</h3>${QS(["p1"])}`;
+  if(p1){
+    h+=`<div class="toolbar" role="group" aria-label="Chart view"><button class="btn ${S.chart==="spike"?"":"alt"}" data-act="chart" data-v="spike">Show spike idea</button><button class="btn ${S.chart==="gradual"?"":"alt"}" data-act="chart" data-v="gradual">Show gradual idea</button><button class="btn ${S.chart==="both"?"":"alt"}" data-act="chart" data-v="both">Show both</button></div>
+    <div class="scroll"><div style="min-width:420px">${impactSVG(S.chart)}</div></div>
+    <p class="note"><b>Schematic only.</b> This is a made-up picture to compare two ideas. It is not real crater data.</p>
+    ${QS(["p2","p3"])}`;
+  }
+  h+=`</div>`;
+  if(full()){
+    h+=`<div class="panel"><h3 style="margin-top:0">Part B. When did the giant planets rearrange?</h3>${QS(["i2"])}`;
+    if(done("i2")){
+      h+=`<p class="stem">Now <b>choose a model</b> for card L on your timeline.</p>
+      <div class="opts" role="group"><button type="button" class="opt" aria-pressed="${S.lm==="early"}" data-act="lm" data-v="early"><b>Early model</b>: within the first 100 million years</button><button type="button" class="opt" aria-pressed="${S.lm==="late"}" data-act="lm" data-v="late"><b>Delayed model</b>: hundreds of millions of years later</button></div>`;
+      if(S.lm)h+=`<div class="why"><p><b>You chose the ${S.lm==="early"?"early":"delayed"} model.</b> Use this model when you place card L in Step 5. ${S.lm==="early"?"It sits beside the early formation cards.":"It sits much later, near the proposed bombardment."}</p>${S.lm==="late"?"<p><b>Required:</b> a late placement needs a <b>cited alternative</b>. Write the source in your activity document.</p>":"<p>Many models support this choice. Cite the source you used.</p>"}<p class="note">Both choices can be defended. What matters is that you can explain it with evidence. If you change your model, go back to Step 5 and check card L again.</p></div>`;
+      h+=QS(["i3"]);
+    }
+    h+=`</div>`;
+  }
+  return h;
+};
+
+V.bridges=()=>{
+  const list=BR.filter(b=>full()||!b.full);
+  return `<div class="panel"><h2>Step 7. Build the bridges</h2>
+  <p class="lead">A bridge explains how one event led to the next. “Time passed” is not an explanation.</p>
+  <p class="note">For each bridge, you will fill a slip: process | cause | time | evidence | source.</p></div>`+
+  list.map((b,n)=>{
+    const ids=[b.id+"k",b.id+"c",b.id+"t",b.id+"e"],all=ids.every(done);
+    const rab=b.rabFrom.map(id=>`<p><b>${id}:</b> ${esc(BYID[id].rab)}</p>`).join("");
+    return `<div class="panel"><h3 style="margin-top:0">Bridge ${n+1}. ${b.title}<br><span class="note">${b.chain}</span></h3>
+    <details><summary>Original “research a bridge” wording</summary>${rab}</details>
+    ${QS(ids)}
+    ${all?`<div class="slip"><p><b>Bridge slip: ${b.chain} | ${strip(b.kind).split(" (")[0]}</b></p><p><b>Missing process:</b> ${b.title}</p><p><b>Cause:</b> ${b.cause.ok}</p><p><b>Time:</b> ${b.time.ok}</p><p><b>Evidence:</b> ${b.evid.ok}</p><p class="src"><b>Source:</b> ${srcLinks(b.src)}</p></div>`:""}</div>`}).join("");
+};
+
+V.assess=()=>`
+<div class="panel"><h2>Step 8. Finish your assessment</h2>
+<h3 style="margin-top:0">Three major change periods</h3>${QS(["as1"])}${done("as1")?QS(["as2"]):""}
+<h3>Bombardment and stability</h3>${QS(["as3","as4","tf1","tf2","tf3","tf4"])}
+<h3>Future change</h3>${QS(["f1","f2","f3","f4","f5"])}
+</div>`;
+
+const CHECK_QS=[]; // assessment-check questions for the Day 1 research document go here
+V.turnin=()=>{
+  const all=Object.values(Q).filter(qActive),dn=all.filter(q=>done(q.id)),first=dn.filter(q=>S.a[q.id].w.length===0&&!S.a[q.id].shown);
+  return `${CHECK_QS.length?`<div class="panel"><h2>Step 9. Assessment check</h2>${QS(CHECK_QS)}</div>`:""}${TEACHER&&!CHECK_QS.length?`<div class="panel"><b>Teacher note:</b> the Day 1 assessment-check questions have not been added yet. This step currently shows only the turn-in options.</div>`:""}
+  <div class="panel"><h2>Turn it in</h2>
+  <p><b>${dn.length}</b> of <b>${all.length}</b> questions finished. <b>${first.length}</b> were right on the first try.</p>
+  <ol><li>Tap <b>Print or save as PDF</b> to make a clean copy.</li><li>Or tap <b>Copy my responses</b> and paste them into Canvas.</li><li>Or tap <b>Download text file</b>.</li></ol>
+  <div class="toolbar"><button class="btn" data-act="print">Print or save as PDF</button><button class="btn" data-act="copy">Copy my responses</button><button class="btn alt" data-act="dl">Download text file</button></div>
+  <p class="fb" id="copymsg" aria-live="polite" tabindex="-1"></p>
+  <label class="note" for="repout">Your responses (you can also select and copy this text):</label>
+  <textarea id="repout" class="out" readonly>${esc(reportText())}</textarea></div>`;
+};
+
+/* ================= REPORT ================= */
+function recRows(){
+  const cs=cardsInMode();
+  return cs.map(c=>{const d=S.a["d_"+c.id],t=S.a["t_"+c.id];return{id:c.id,t:c.t,date:strip(c.date.ok),type:typeLabel[c.type],ev:c.ev.map(strip).join(" "),src:srcNums(c.src),reason:strip(c.reason),tries:(d?d.w.length+1:0)+"/"+(t?t.w.length+1:0),did:!!(d&&d.done),tid:!!(t&&t.done)}});
+}
+function bridgeRows(){return BR.filter(b=>full()||!b.full).map(b=>({b,done:[b.id+"k",b.id+"c",b.id+"t",b.id+"e"].every(done)}))}
+function reportText(){
+  const L=[];const date=new Date().toLocaleDateString();
+  L.push("SOLAR SYSTEM TIMELINE INVESTIGATION");
+  L.push("Name: "+(S.name||"(no name)")+"   Date: "+date+"   Lesson: "+(full()?"Full (12 cards)":"Short (9 cards)"));
+  L.push("");L.push("CARD RECORDS (date or range | evidence | source | placement reason)");
+  recRows().forEach(r=>{L.push(r.id+" "+r.t+" ["+typeLabel[BYID[r.id].type]+"; tries "+r.tries+"]");L.push("   date: "+(r.did?r.date:"(not finished)")+" | evidence: "+(r.did?r.ev:"")+" | source: "+r.src+" | placement: "+(r.did?r.reason:""));});
+  L.push("");L.push("TIMELINE I BUILT (start to end in BYA | type)");
+  cardsInMode().forEach(c=>{const t=S.tl[c.id];L.push(c.id+" "+c.short+": "+(t?(t.s.toFixed(3)+" to "+(t.e<=0.0005?"today":t.e.toFixed(3))+" BYA | "+({change:"Change",stability:"Increasing stability",both:"Both"}[t.type]||"no type")+(t.hyp?" | hypothesis":"")+(t.ok?(t.shown?" | answer shown":" | checked"):" | not checked")):"(not placed)"))});
+  L.push("");L.push("ORDER I PREDICTED (oldest first): "+(S.order?S.order.join(" "):"(not done)"));
+  const w=curWindow();L.push("INSET WINDOW: "+(w?w.t:"(not chosen)"));
+  if(full())L.push("GIANT PLANET MODEL FOR CARD L: "+(S.lm?(S.lm==="early"?"Early":"Delayed (needs a cited alternative)"):"(not chosen)"));
+  L.push("E is labeled: Hypothesis"+(done("p3")?"":" (not finished)"));
+  L.push("");L.push("BRIDGES (process | cause | time | evidence | source)");
+  bridgeRows().forEach(({b,done:d})=>{L.push(b.chain+" ["+strip(b.kind).split(" (")[0]+"]"+(d?"":" (not finished)"));if(d)L.push("   "+b.title+" | "+strip(b.cause.ok)+" | "+strip(b.time.ok)+" | "+strip(b.evid.ok)+" | "+srcNums(b.src))});
+  L.push("");L.push("ASSESSMENT");
+  ["as1","as2","as3","as4","tf1","tf2","tf3","tf4","f1","f2","f3","f4","f5"].forEach(id=>{const q=Q[id];L.push("- "+strip(q.stem)+" -> "+pickText(id))});
+  return L.join("\n");
+}
+function reportHTML(){
+  const rows=recRows(),cs=cardsInMode(),w=curWindow();
+  let h=`<h1>Solar System Timeline Investigation</h1><p><b>Name:</b> ${esc(S.name||"(no name)")} &nbsp; <b>Date:</b> ${esc(new Date().toLocaleDateString())} &nbsp; <b>Lesson:</b> ${full()?"Full (12 cards)":"Short (9 cards)"}</p>`;
+  h+=`<h2>My timeline</h2>${tlSVG({hi:4.6,lo:0,rows:cs,mark:(w&&w.lo>0)?w:null,label:"Full timeline"})}`;
+  if(w&&w.lo>0){const m=winMetrics(w);h+=`<h2>Inset: ${esc(w.t)} (zoom ×${m.zoom})</h2>${tlSVG({hi:w.hi,lo:w.lo,rows:cs.filter(c=>!m.out.includes(c.id)),label:"Inset"})}`}
+  h+=`<h2>Card records</h2><table class="rec"><thead><tr><th>Card</th><th>Date or range</th><th>Type</th><th>Evidence</th><th>Source</th><th>Placement reason</th></tr></thead><tbody>`+rows.map(r=>`<tr><td><b>${r.id}</b> ${esc(r.t)}</td><td>${r.did?esc(r.date):"(not finished)"}</td><td>${r.tid?esc(r.type):"(not finished)"}</td><td>${r.did?esc(r.ev):""}</td><td>${r.src}</td><td>${r.did?esc(r.reason):""}</td></tr>`).join("")+`</tbody></table>`;
+  h+=`<h2>Bridges</h2><table class="rec"><thead><tr><th>Between</th><th>Type</th><th>Process</th><th>Cause</th><th>Time</th><th>Evidence</th><th>Source</th></tr></thead><tbody>`+bridgeRows().map(({b,done:d})=>`<tr><td>${esc(b.chain)}</td><td>${esc(strip(b.kind).split(" (")[0])}</td>${d?`<td>${esc(b.title)}</td><td>${esc(strip(b.cause.ok))}</td><td>${esc(strip(b.time.ok))}</td><td>${esc(strip(b.evid.ok))}</td><td>${srcNums(b.src)}</td>`:`<td colspan="5">(not finished)</td>`}</tr>`).join("")+`</tbody></table>`;
+  h+=`<h2>Assessment</h2><ul>`+["as1","as2","as3","as4","tf1","tf2","tf3","tf4","f1","f2","f3","f4","f5"].map(id=>`<li>${esc(strip(Q[id].stem))}<br><b>${esc(pickText(id))}</b></li>`).join("")+`</ul>`;
+  h+=`<h2>Sources</h2><ul>`+Object.keys(SRC).map(n=>`<li>[${n}] ${esc(SRC[n][0])} — ${esc(SRC[n][1])}</li>`).join("")+`</ul>`;
+  return h;
+}
+
+
+/* ================= RENDER + EVENTS ================= */
+const app=$("#app");
+function renderSteps(){
+  $("#steps").innerHTML=STEPS.map((s,i)=>`<button type="button" data-act="go" data-s="${i}" class="${stepDone(i)?"done":""}" ${i===S.step?'aria-current="step"':""}><span class="n">${stepDone(i)&&i!==S.step?"✓":i+1}</span> ${s.n}</button>`).join("");
+}
+function render(){app.innerHTML=V[STEPS[S.step].k]();renderSteps();save()}
+function rr(qid,focusSel){ // re-render, keep scroll, restore focus
+  const y=window.scrollY;render();window.scrollTo(0,y);
+  let el=null;
+  if(focusSel&&qid)el=$(`[data-qid="${qid}"] ${focusSel}`);
+  else if(qid)el=$(`[data-qid="${qid}"] .fb`);
+  if(el)el.focus({preventScroll:true});
+}
+function go(i){S.step=Math.max(0,Math.min(STEPS.length-1,i));render();window.scrollTo(0,0);app.focus({preventScroll:true})}
+
+A.go=b=>go(+b.dataset.s);
+A.begin=()=>{const nm=$("[data-name]");if(nm)S.name=nm.value.trim();S.started=true;go(1)};
+A.reset=()=>{if(confirm("Erase all of your work on this device and start over?")){const nm=S.name;S=fresh();S.name=nm;save();render();window.scrollTo(0,0)}};
+A.mv=b=>{const i=+b.dataset.i,d=+b.dataset.d,j=i+d;if(j<0||j>=S.order.length)return;[S.order[i],S.order[j]]=[S.order[j],S.order[i]];S.orderMsg=[];render();const nb=$(`[data-act=mv][data-i="${j}"][data-d="${d}"]`);if(nb)nb.focus({preventScroll:false})};
+A.chkorder=()=>{
+  const pos={};S.order.forEach((id,i)=>pos[id]=i);
+  const bad=CONS.filter(([a,b])=>pos[a]!==undefined&&pos[b]!==undefined&&pos[a]>pos[b]);
+  S.orderChecks++;
+  if(!bad.length){S.orderDone=true;S.orderMsg=[]}
+  else S.orderMsg=bad.slice(0,2).map(([a,b,why])=>`Look at <b>${a}</b> and <b>${b}</b>. Hint: ${why}`);
+  render();const f=$(".fb");if(f)f.focus({preventScroll:true});
+};
+A.showorder=()=>{const k=ORDER_KEY_FULL.filter(i=>cardsInMode().some(c=>c.id===i));S.order=k;S.orderDone=true;S.orderShown=true;S.orderMsg=[];render()};
+A.card=b=>{S.cur=b.dataset.id;if(b.dataset.go4){go(3);return}render();window.scrollTo(0,0)};
+A.chart=b=>{S.chart=b.dataset.v;render()};
+A.lm=b=>{if(S.lm!==b.dataset.v&&S.tl.L)S.tl.L.ok=false;S.lm=b.dataset.v;render()};
+function rb(focusFb){const y=window.scrollY;render();window.scrollTo(0,y);if(focusFb){const f=$("#fb5");if(f)f.focus({preventScroll:true})}}
+A.selrow=b=>{S.sel5=b.dataset.id;const y=window.scrollY;render();window.scrollTo(0,y);const c=$("#ctl5");if(c&&b.tagName.toLowerCase()!=="button")c.scrollIntoView({block:"nearest",behavior:"smooth"})};
+A.addcard=()=>{const v=dView(),st=vStep(v),N=Math.round((v.hi-v.lo)/st);S.tl[S.sel5]={s:r4(v.hi-st*Math.round(N*0.25)),e:r4(v.hi-st*Math.round(N*0.35)),type:null,hyp:false,ok:false,tries:0,msg:[],view:S.bview};rb()};
+A.rem5=()=>{delete S.tl[S.sel5];rb()};
+A.bview=b=>{S.bview=b.dataset.v;rb()};
+A.settype=b=>{const t=S.tl[S.sel5];if(!t)return;t.type=b.dataset.v;t.ok=false;rb()};
+A.lm5=b=>{if(S.lm!==b.dataset.v&&S.tl.L)S.tl.L.ok=false;S.lm=b.dataset.v;rb()};
+A.chk5=()=>{checkBuild(S.sel5);rb(true)};
+A.show5=()=>{const c=BYID[S.sel5],t=S.tl[S.sel5];if(!t)return;if(c.id==="L"&&!S.lm)S.lm="early";const r=refOf(c);t.s=c.id==="C"?3.8:r.s;t.e=c.id==="C"?0:r.e;t.type=c.type;t.hyp=c.id==="E";t.ok=true;t.shown=true;t.target=false;t.msg=[];rb(true)};
+A.print=()=>{$("#printArea").innerHTML=reportHTML();window.print()};
+A.copy=async()=>{const t=reportText();const msg=$("#copymsg");let ok=false;try{await navigator.clipboard.writeText(t);ok=true}catch(e){const ta=$("#repout");if(ta){ta.focus();ta.select();try{ok=document.execCommand("copy")}catch(e2){}}}
+  if(msg){msg.textContent=ok?"Copied! Paste it into Canvas.":"Could not copy. Select the text in the box and copy it.";msg.focus({preventScroll:true})}};
+A.dl=()=>{const blob=new Blob([reportText()],{type:"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="solar-system-timeline-"+(S.name||"student").replace(/[^a-z0-9]+/gi,"-")+".txt";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
+
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b||b.disabled)return;const f=A[b.dataset.act];if(f)f(b,e)});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.matches("[data-match]")){const a=ans(t.dataset.match);a.m=a.m||{};a.m[t.dataset.row]=t.value;save()}
+  else if(t.matches("[data-hyp]")){const tl=S.tl[S.sel5];if(tl){tl.hyp=t.checked;tl.ok=false;rb()}}
+  else if(t.matches("[data-name]")){S.name=t.value.trim();save()}
+  else if(t.name==="mode"){S.mode=t.value;save();renderSteps()}
+});
+document.addEventListener("input",e=>{const t=e.target;
+  if(t.matches("[data-name]")){S.name=t.value.trim();save()}
+  else if(t.matches("[data-sl]")){const tl=S.tl[S.sel5];if(!tl)return;const v=dView(),st=vStep(v),val=r4(v.hi-(+t.value)*st);
+    if(t.dataset.sl==="s"){tl.s=val;if(tl.e>tl.s)tl.e=tl.s}else{tl.e=val;if(tl.s<tl.e)tl.s=tl.e}
+    tl.ok=false;tl.target=false;tl.view=S.bview;save();liveBuild()}
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&e.target.matches("[data-num]")){e.preventDefault();const b=$(`[data-act=checknum][data-id="${e.target.dataset.num}"]`);if(b)b.click()}
+  if(e.key==="Escape"&&!$("#glossary").hidden){$("#gbtn").click()}
+});
+
+/* word bank */
+$("#glossary").innerHTML=`<button class="btn alt" type="button" id="gclose">Close</button><h2 style="margin-top:12px">Word bank</h2><dl>${GLOSS.map(g=>`<dt>${g[0]}</dt><dd>${g[1]}</dd>`).join("")}</dl><h3>Sources</h3><p class="note">These are optional links. Your work is not sent anywhere.</p><ul class="src">${Object.keys(SRC).map(n=>`<li>${srcLinks([+n])}</li>`).join("")}</ul>`;
+$("#gbtn").addEventListener("click",()=>{const g=$("#glossary"),open=g.hidden;g.hidden=!open;$("#gbtn").setAttribute("aria-expanded",String(open));if(open)$("#gclose").focus()});
+$("#gclose").addEventListener("click",()=>{$("#glossary").hidden=true;$("#gbtn").setAttribute("aria-expanded","false");$("#gbtn").focus()});
+
+render();
+})();
+</script>
+</body>
+</html>
